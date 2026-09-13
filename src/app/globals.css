@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Sober Oslo — design tokens
+   One warm, calm palette. Cream ground, warm charcoal ink, deep green brand,
+   sage for quiet surfaces, coral used sparingly as a highlight.
+   ========================================================================== */
+
+@theme {
+  --color-cream: #f6f3ec;
+  --color-paper: #fffcf5;
+  --color-ink: #16191a;
+  --color-muted: #5d6460;
+  --color-line: #e4dfd2;
+
+  --color-green: #14624a;
+  --color-green-deep: #0e4535;
+  --color-green-ink: #08281f;
+
+  --color-sage: #dce7db;
+  --color-sage-deep: #bcd0ba;
+
+  --color-coral: #e4633c;
+  --color-coral-soft: #f7ddd2;
+
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-display:
+    var(--font-fraunces), ui-serif, Georgia, Cambria, "Times New Roman", serif;
+
+  --radius-card: 1.25rem;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    /* `clip` rather than `hidden`: it stops sideways overflow without turning
+       the body into a scroll container, which would break the sticky header. */
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, consistent keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--color-green);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--color-sage-deep);
+    color: var(--color-green-ink);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Utilities
+   -------------------------------------------------------------------------- */
+
+@utility display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 8.5vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+}
+
+@utility display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+}
+
+@utility display-md {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+}
+
+@utility eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Body copy that stays comfortable at every width. */
+@utility lede {
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  line-height: 1.6;
+}
+
+/* Link underline that grows on hover — used in the footer and inline text. */
+@utility link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 0.35s var(--ease-out-soft);
+
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Motion — a small, shared vocabulary
+   -------------------------------------------------------------------------- */
+
+/* Scroll reveal: blur-to-clear with a gentle rise. Driven by <Reveal />. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(6px);
+  transition:
+    opacity 0.7s var(--ease-out-soft),
+    transform 0.7s var(--ease-out-soft),
+    filter 0.7s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  /* `none`, not `blur(0)`: any filter value other than none makes this element
+     the containing block for fixed children, which would trap a modal inside
+     the section instead of letting it cover the screen. Same for will-change. */
+  filter: none;
+  will-change: auto;
+}
+
+@keyframes so-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.so-marquee-track {
+  animation: so-marquee var(--marquee-duration, 60s) linear infinite;
+}
+
+/* Pausing on focus as well as hover gives keyboard users the control that
+   WCAG 2.2.2 asks for on content that moves by itself. */
+.so-marquee:hover .so-marquee-track,
+.so-marquee:focus-within .so-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes so-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion — everything above degrades to "just show it"
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .so-marquee-track {
+    animation: none;
+    transform: none;
+  }
+
+  /* With the animation off, let people scroll the strip by hand instead. */
+  .so-marquee {
+    overflow-x: auto;
+  }
+}
