@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 
 import { MembershipCTA } from "@/components/MembershipCTA";
 import { ActivityMeta } from "@/components/activities/ActivityMeta";
-import { ActivityMedia } from "@/components/media/ActivityMedia";
-import type { GalleryImage } from "@/components/media/GalleryLightbox";
+import {
+  GalleryLightbox,
+  type GalleryImage,
+} from "@/components/media/GalleryLightbox";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Media } from "@/components/ui/Media";
@@ -15,7 +17,6 @@ import { getActivity, getActivitySlugs, getSettings } from "@/lib/content";
 import { formatFullDate, formatTimeRange, machineDateTime } from "@/lib/format";
 import { categoryLabels } from "@/lib/site";
 import { safeExternalUrl } from "@/lib/urls";
-import { getUploadedVideos, getVideoEmbeds } from "@/lib/video";
 import { urlForImage } from "@/sanity/image";
 
 type PageProps = {
@@ -68,8 +69,8 @@ export default async function ActivityDetailPage({ params }: PageProps) {
 
   const registrationUrl = safeExternalUrl(activity.registrationUrl);
 
-  // Media is prepared here on the server, so the image-url builder and the
-  // link validation never reach the browser.
+  // Prepared here on the server, so the image-url builder never reaches the
+  // browser.
   const galleryImages: GalleryImage[] = (activity.gallery ?? []).map(
     (image, index) => ({
       src: urlForImage(image, 1600),
@@ -77,9 +78,6 @@ export default async function ActivityDetailPage({ params }: PageProps) {
       seed: `${activity.slug}-${index}`,
     }),
   );
-  const embeds = getVideoEmbeds(activity.videoUrls);
-  const uploads = getUploadedVideos(activity.videoFiles);
-  const hasMedia = galleryImages.length + embeds.length + uploads.length > 0;
 
   const time = formatTimeRange(activity.startTime, activity.endTime);
   const category = activity.category ? categoryLabels[activity.category] : null;
@@ -208,16 +206,19 @@ export default async function ActivityDetailPage({ params }: PageProps) {
           </div>
         </Container>
 
-        {/* ------------------------------------------------ Pictures and video */}
-        {hasMedia ? (
+        {/* ----------------------------------------------------------- Bilder */}
+        {galleryImages.length > 0 ? (
           <Container size="wide" className="mt-20 sm:mt-28">
             <Reveal>
-              <ActivityMedia
-                images={galleryImages}
-                embeds={embeds}
-                uploads={uploads}
-                title={activity.title}
-              />
+              <section>
+                <h2 className="display-md text-ink">Bilder</h2>
+                <p className="mt-3 text-muted">
+                  Trykk på et bilde for å se det i full størrelse.
+                </p>
+                <div className="mt-8">
+                  <GalleryLightbox images={galleryImages} />
+                </div>
+              </section>
             </Reveal>
           </Container>
         ) : null}

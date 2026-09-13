@@ -22,20 +22,11 @@ export type ActivitySummary = {
   coverImage?: CmsImage | null;
 };
 
-/** A video uploaded straight from a phone or computer, stored by Sanity. */
-export type CmsVideoFile = {
-  url?: string | null;
-  mimeType?: string | null;
-  caption?: string | null;
-};
-
 /** Everything the detail page renders. */
 export type Activity = ActivitySummary & {
   description?: PortableTextBlock[] | null;
   practicalInfo?: PortableTextBlock[] | null;
   gallery?: CmsImage[] | null;
-  videoUrls?: string[] | null;
-  videoFiles?: CmsVideoFile[] | null;
   registrationUrl?: string | null;
 };
 

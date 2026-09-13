@@ -121,7 +121,7 @@ export const activitiesContent = {
 
   pastEyebrow: "Tidligere",
   pastHeading: "Det vi har gjort",
-  pastIntro: "Bilder og videoer fra aktiviteter vi har arrangert.",
+  pastIntro: "Bilder fra aktiviteter vi har arrangert.",
 } as const;
 
 export const aboutContent = {
@@ -235,7 +235,6 @@ export const starterActivities: Activity[] = [
     ]),
     registrationUrl: null,
     gallery: null,
-    videoUrls: null,
   },
   {
     _id: "starter-brettspill",
@@ -256,7 +255,6 @@ export const starterActivities: Activity[] = [
     practicalInfo: paragraphsToBlocks(practicalBasics),
     registrationUrl: null,
     gallery: null,
-    videoUrls: null,
   },
   {
     _id: "starter-badstu",
@@ -280,7 +278,6 @@ export const starterActivities: Activity[] = [
     ]),
     registrationUrl: "https://example.com/pamelding",
     gallery: null,
-    videoUrls: null,
   },
   {
     _id: "starter-sk-kaffe",
@@ -301,7 +298,6 @@ export const starterActivities: Activity[] = [
     practicalInfo: paragraphsToBlocks(practicalBasics),
     registrationUrl: null,
     gallery: null,
-    videoUrls: null,
   },
   {
     _id: "starter-klatring",
@@ -325,7 +321,6 @@ export const starterActivities: Activity[] = [
     ]),
     registrationUrl: "https://example.com/pamelding",
     gallery: null,
-    videoUrls: null,
   },
   {
     _id: "starter-film",
@@ -346,7 +341,6 @@ export const starterActivities: Activity[] = [
     practicalInfo: paragraphsToBlocks(practicalBasics),
     registrationUrl: "https://example.com/pamelding",
     gallery: null,
-    videoUrls: null,
   },
 ];
 

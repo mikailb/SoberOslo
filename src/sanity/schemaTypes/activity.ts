@@ -2,10 +2,6 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 
 import { IMAGE_FORMAT_HINT, rejectSvgUpload } from "./imageRules";
 
-/** Only these two providers can be embedded on the website. */
-const VIDEO_HOST =
-  /^(https:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com)\//i;
-
 export const activity = defineType({
   name: "activity",
   title: "Aktivitet",
@@ -13,7 +9,7 @@ export const activity = defineType({
   groups: [
     { name: "main", title: "1. Om aktiviteten", default: true },
     { name: "when", title: "2. Tid og sted" },
-    { name: "media", title: "3. Bilder og video" },
+    { name: "media", title: "3. Bilder" },
     { name: "signup", title: "4. Påmelding" },
   ],
   fields: [
@@ -134,7 +130,7 @@ export const activity = defineType({
       validation: (rule) => rule.max(40),
     }),
 
-    /* ---------------------------------------------------------- Media ----- */
+    /* --------------------------------------------------------- Bilder ----- */
     defineField({
       name: "coverImage",
       title: "Hovedbilde",
@@ -174,50 +170,6 @@ export const activity = defineType({
         }),
       ],
       options: { layout: "grid" },
-    }),
-    defineField({
-      name: "videoUrls",
-      title: "Videolenker",
-      type: "array",
-      group: "media",
-      description:
-        "Lim inn lenker fra YouTube eller Vimeo. Bruk dette for lange videoer.",
-      of: [
-        defineArrayMember({
-          type: "url",
-          validation: (rule) =>
-            rule.uri({ scheme: ["https"] }).custom((value) => {
-              if (!value) return true;
-              return VIDEO_HOST.test(value)
-                ? true
-                : "Bare lenker fra YouTube eller Vimeo kan vises på nettsiden.";
-            }),
-        }),
-      ],
-    }),
-    defineField({
-      name: "videoFiles",
-      title: "Videoer fra mobil eller PC",
-      type: "array",
-      group: "media",
-      description:
-        "Godtar MP4 og WebM. MOV fra iPhone spilles ikke av i alle nettlesere. Hold klippene under ca. 50 MB. Lange videoer bør heller legges på YouTube og lenkes over.",
-      of: [
-        defineArrayMember({
-          type: "file",
-          title: "Video",
-          options: { accept: "video/*" },
-          fields: [
-            defineField({
-              name: "caption",
-              title: "Bildetekst",
-              type: "string",
-              description: "Valgfritt. Vises under videoen.",
-              validation: (rule) => rule.max(120),
-            }),
-          ],
-        }),
-      ],
     }),
 
     /* -------------------------------------------------------- Påmelding --- */

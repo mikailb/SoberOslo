@@ -44,12 +44,6 @@ export const activityBySlugQuery = groq`
     description,
     practicalInfo,
     registrationUrl,
-    videoUrls,
-    "videoFiles": videoFiles[]{
-      caption,
-      "url": asset->url,
-      "mimeType": asset->mimeType
-    },
     gallery[] ${imageFields}
   }
 `;
