@@ -2,14 +2,12 @@ import type { Metadata } from "next";
 
 import { MembershipCTA } from "@/components/MembershipCTA";
 import { AnimatedHeading } from "@/components/ui/AnimatedHeading";
-import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Media } from "@/components/ui/Media";
 import { Reveal } from "@/components/ui/Reveal";
 import { RichText } from "@/components/ui/RichText";
 import { getAboutPage, getSettings, textFrom } from "@/lib/content";
 import { aboutContent, paragraphsToBlocks } from "@/lib/site";
-import { safeExternalUrl } from "@/lib/urls";
 import type { CmsImage } from "@/sanity/types";
 
 export const metadata: Metadata = {
@@ -31,13 +29,6 @@ export default async function AboutPage() {
     ? (page.missionBody ?? [])
     : paragraphsToBlocks([...aboutContent.missionBody]);
   const values = page ? (page.values ?? []) : aboutContent.values;
-  const volunteerHeading = t(
-    page?.volunteerHeading,
-    aboutContent.volunteerHeading,
-  );
-  const volunteerBody = t(page?.volunteerBody, aboutContent.volunteerBody);
-  const volunteerUrl =
-    safeExternalUrl(page?.volunteerUrl) ?? settings.membershipUrl;
 
   const imageSlots: (CmsImage | null)[] = page?.images?.length
     ? page.images.slice(0, 3)
@@ -134,34 +125,6 @@ export default async function AboutPage() {
               </li>
             ))}
           </ul>
-        </Container>
-      </section>
-
-      {/* ----------------------------------------------------------- Volunteer */}
-      <section className="py-20 sm:py-28">
-        <Container size="wide">
-          <Reveal>
-            <div className="grid gap-10 border-t border-line pt-12 lg:grid-cols-12">
-              <div className="lg:col-span-5">
-                {volunteerHeading ? (
-                  <h2 className="display-md text-ink">{volunteerHeading}</h2>
-                ) : null}
-              </div>
-              <div className="lg:col-span-7">
-                {volunteerBody ? (
-                  <p className="lede text-muted">{volunteerBody}</p>
-                ) : null}
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Button href={volunteerUrl} size="lg">
-                    Bli frivillig
-                  </Button>
-                  <Button href="/activities" variant="secondary" size="lg">
-                    Se aktiviteter
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </Reveal>
         </Container>
       </section>
 

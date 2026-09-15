@@ -23,14 +23,29 @@ export const siteConfig = {
 
   contactEmail: "hei@soberoslo.no",
 
-  social: {
-    instagram: "https://instagram.com/soberoslo",
-    facebook: "https://facebook.com/soberoslo",
-    tiktok: "https://tiktok.com/@soberoslo",
-  },
+  /**
+   * Only used before the settings exist in Sanity. After that the list under
+   * Innstillinger -> Sosiale medier decides, including showing none at all.
+   */
+  social: [
+    { label: "Instagram", url: "https://instagram.com/soberoslo" },
+    { label: "Facebook", url: "https://facebook.com/soberoslo" },
+  ],
 
   /** Used for absolute URLs in metadata. Override with NEXT_PUBLIC_SITE_URL. */
   url: process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://soberoslo.no",
+
+  /**
+   * The footer, which is the same on every page. All of it is editable under
+   * Innstillinger -> Bunntekst in Sanity.
+   */
+  footer: {
+    navHeading: "Sider",
+    contactHeading: "Kontakt",
+    membershipLabel: "Bli medlem",
+    copyrightNote: "Frivillig organisasjon i Oslo.",
+    note: "Alle aktiviteter er alkoholfrie og åpne for alle.",
+  },
 } as const;
 
 export const navigation = [
@@ -155,9 +170,6 @@ export const aboutContent = {
       body: "Vi har verter på hvert arrangement, tydelige kjøreregler og null toleranse for utestengende oppførsel.",
     },
   ],
-  volunteerHeading: "Vil du bidra?",
-  volunteerBody:
-    "Vi trenger alltid flere verter, turledere og folk som kan ta bilder. Det krever ikke mer enn et par timer i måneden.",
 } as const;
 
 export const soberKvinnerContent = {

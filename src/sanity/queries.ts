@@ -65,11 +65,14 @@ export const siteSettingsQuery = groq`
     organisationName,
     tagline,
     description,
+    footerNavHeading,
+    footerContactHeading,
+    footerMembershipLabel,
+    footerCopyrightNote,
+    footerNote,
     membershipUrl,
     contactEmail,
-    instagramUrl,
-    facebookUrl,
-    tiktokUrl
+    socialLinks[]{ _key, label, url }
   }
 `;
 
@@ -124,10 +127,7 @@ export const aboutPageQuery = groq`
     missionHeading,
     missionBody,
     values[]{ _key, heading, body },
-    images[] ${imageFields},
-    volunteerHeading,
-    volunteerBody,
-    volunteerUrl
+    images[] ${imageFields}
   }
 `;
 

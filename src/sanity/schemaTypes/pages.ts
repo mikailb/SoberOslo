@@ -396,7 +396,6 @@ export const aboutPage = defineType({
     { name: "hero", title: "Toppseksjon", default: true },
     { name: "mission", title: "Hvorfor vi finnes" },
     { name: "values", title: "Slik jobber vi" },
-    { name: "volunteer", title: "Frivillige" },
   ],
   fields: [
     defineField({
@@ -440,29 +439,6 @@ export const aboutPage = defineType({
       group: "values",
       of: [textSection],
       validation: (rule) => rule.max(6),
-    }),
-    defineField({
-      name: "volunteerHeading",
-      title: "Overskrift",
-      type: "string",
-      group: "volunteer",
-      validation: (rule) => rule.max(70),
-    }),
-    defineField({
-      name: "volunteerBody",
-      title: "Tekst",
-      type: "text",
-      rows: 4,
-      group: "volunteer",
-      validation: (rule) => rule.max(400),
-    }),
-    defineField({
-      name: "volunteerUrl",
-      title: "Lenke for frivillige",
-      type: "url",
-      group: "volunteer",
-      description: "Valgfritt. Uten lenke brukes medlemslenken.",
-      validation: (rule) => rule.uri({ scheme: ["https"] }),
     }),
   ],
   preview: { prepare: () => ({ title: "Om oss" }) },

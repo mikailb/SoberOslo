@@ -41,29 +41,71 @@ import { findStarterActivity, siteConfig, starterActivities } from "./site";
 export type ResolvedSettings = {
   name: string;
   tagline: string;
-  description: string;
   membershipUrl: string;
   contactEmail: string;
-  instagramUrl: string | null;
-  facebookUrl: string | null;
-  tiktokUrl: string | null;
+  /** Whatever channels the editors listed, in their order. */
+  socialLinks: { label: string; url: string }[];
+  /** Everything in the footer, which is the same on every page. */
+  footer: {
+    description: string;
+    navHeading: string;
+    contactHeading: string;
+    membershipLabel: string;
+    copyrightNote: string;
+    note: string;
+  };
 };
+
+/**
+ * The social channels shown in the footer.
+ *
+ * Editors control the whole list, so removing a row removes it from the site.
+ * Each address is validated, and a row missing a name or a usable address is
+ * skipped rather than rendered as a broken link.
+ */
+function resolveSocialLinks(
+  cms: SiteSettings | null,
+): { label: string; url: string }[] {
+  if (!cms) return [...siteConfig.social];
+
+  return (cms.socialLinks ?? []).flatMap((item) => {
+    const label = item?.label?.trim();
+    const url = safeExternalUrl(item?.url);
+    return label && url ? [{ label, url }] : [];
+  });
+}
 
 export async function getSettings(): Promise<ResolvedSettings> {
   const cms = await sanityFetch<SiteSettings>(siteSettingsQuery);
 
+  // Footer copy follows the same rule as the pages: once the settings exist in
+  // Sanity, a field left empty means that line is gone from the footer.
+  const t = textFrom(cms);
+
   return {
     name: cms?.organisationName?.trim() || siteConfig.name,
     tagline: cms?.tagline?.trim() || siteConfig.tagline,
-    description: cms?.description?.trim() || siteConfig.description,
     membershipUrl:
       safeExternalUrl(cms?.membershipUrl) ?? siteConfig.membershipUrl,
     contactEmail: cms?.contactEmail?.trim() || siteConfig.contactEmail,
-    instagramUrl:
-      safeExternalUrl(cms?.instagramUrl) ?? siteConfig.social.instagram,
-    facebookUrl:
-      safeExternalUrl(cms?.facebookUrl) ?? siteConfig.social.facebook,
-    tiktokUrl: safeExternalUrl(cms?.tiktokUrl) ?? siteConfig.social.tiktok,
+    socialLinks: resolveSocialLinks(cms),
+    footer: {
+      description: t(cms?.description, siteConfig.description),
+      navHeading: t(cms?.footerNavHeading, siteConfig.footer.navHeading),
+      contactHeading: t(
+        cms?.footerContactHeading,
+        siteConfig.footer.contactHeading,
+      ),
+      membershipLabel: t(
+        cms?.footerMembershipLabel,
+        siteConfig.footer.membershipLabel,
+      ),
+      copyrightNote: t(
+        cms?.footerCopyrightNote,
+        siteConfig.footer.copyrightNote,
+      ),
+      note: t(cms?.footerNote, siteConfig.footer.note),
+    },
   };
 }
 

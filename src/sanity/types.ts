@@ -34,11 +34,15 @@ export type SiteSettings = {
   organisationName?: string | null;
   tagline?: string | null;
   description?: string | null;
+  footerNavHeading?: string | null;
+  footerContactHeading?: string | null;
+  footerMembershipLabel?: string | null;
+  footerCopyrightNote?: string | null;
+  footerNote?: string | null;
   membershipUrl?: string | null;
   contactEmail?: string | null;
-  instagramUrl?: string | null;
-  facebookUrl?: string | null;
-  tiktokUrl?: string | null;
+  socialLinks?:
+    { _key: string; label?: string | null; url?: string | null }[] | null;
 };
 
 export type PageSection = {
@@ -66,9 +70,6 @@ export type AboutPage = {
   missionBody?: PortableTextBlock[] | null;
   values?: PageSection[] | null;
   images?: CmsImage[] | null;
-  volunteerHeading?: string | null;
-  volunteerBody?: string | null;
-  volunteerUrl?: string | null;
 };
 
 export type SoberKvinnerPage = {
