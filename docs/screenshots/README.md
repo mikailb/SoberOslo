@@ -8,7 +8,7 @@
 
 ![Aktiviteter](aktiviteter.png)
 
-## Sober Kvinner r
+## Sober Kvinner 
 
 ![Sober Kvinner](sober-kvinner.png)
 
