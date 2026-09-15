@@ -127,7 +127,9 @@ export const aboutPageQuery = groq`
     missionHeading,
     missionBody,
     values[]{ _key, heading, body },
-    images[] ${imageFields}
+    images[] ${imageFields},
+    ctaHeading,
+    ctaBody
   }
 `;
 
@@ -154,6 +156,8 @@ export const merchPageQuery = groq`
     intro,
     shopUrl,
     linkLabel,
+    ctaHeading,
+    ctaBody,
     image ${imageFields}
   }
 `;

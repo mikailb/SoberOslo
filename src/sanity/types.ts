@@ -70,6 +70,8 @@ export type AboutPage = {
   missionBody?: PortableTextBlock[] | null;
   values?: PageSection[] | null;
   images?: CmsImage[] | null;
+  ctaHeading?: string | null;
+  ctaBody?: string | null;
 };
 
 export type SoberKvinnerPage = {
@@ -95,6 +97,8 @@ export type MerchPage = {
   image?: CmsImage | null;
   shopUrl?: string | null;
   linkLabel?: string | null;
+  ctaHeading?: string | null;
+  ctaBody?: string | null;
 };
 
 export type HomeStat = {

@@ -396,6 +396,7 @@ export const aboutPage = defineType({
     { name: "hero", title: "Toppseksjon", default: true },
     { name: "mission", title: "Hvorfor vi finnes" },
     { name: "values", title: "Slik jobber vi" },
+    { name: "cta", title: "Bli medlem" },
   ],
   fields: [
     defineField({
@@ -440,6 +441,27 @@ export const aboutPage = defineType({
       of: [textSection],
       validation: (rule) => rule.max(6),
     }),
+
+    /* -------------------------------------------------------- Bli medlem --- */
+    defineField({
+      name: "ctaHeading",
+      title: "Overskrift",
+      type: "string",
+      group: "cta",
+      description:
+        'Den mørkegrønne seksjonen nederst på siden. Standard er "Vil du bli med?".',
+      validation: (rule) => rule.max(70),
+    }),
+    defineField({
+      name: "ctaBody",
+      title: "Tekst",
+      type: "text",
+      rows: 3,
+      group: "cta",
+      description:
+        "Selve knappen peker til lenken du setter under Innstillinger.",
+      validation: (rule) => rule.max(300),
+    }),
   ],
   preview: { prepare: () => ({ title: "Om oss" }) },
 });
@@ -452,7 +474,7 @@ export const soberKvinnerPage = defineType({
     { name: "hero", title: "Toppseksjon", default: true },
     { name: "intro", title: "Introduksjon" },
     { name: "media", title: "Bilder" },
-    { name: "cta", title: "Oppfordring" },
+    { name: "cta", title: "Bli medlem" },
   ],
   fields: [
     defineField({
@@ -550,11 +572,17 @@ export const merchPage = defineType({
   name: "merchPage",
   title: "Merch",
   type: "document",
+  groups: [
+    { name: "main", title: "1. Merch", default: true },
+    { name: "cta", title: "2. Bli medlem" },
+  ],
   fields: [
+    /* ------------------------------------------------------------ Merch ---- */
     defineField({
       name: "heading",
       title: "Overskrift",
       type: "string",
+      group: "main",
       description: "La stå tom for å bruke standardteksten.",
       validation: (rule) => rule.max(70),
     }),
@@ -563,13 +591,15 @@ export const merchPage = defineType({
       title: "Ingress",
       type: "text",
       rows: 3,
+      group: "main",
       validation: (rule) => rule.max(300),
     }),
-    imageWithAlt("image", "Bilde"),
+    imageWithAlt("image", "Bilde", "main"),
     defineField({
       name: "shopUrl",
       title: "Lenke til nettbutikken",
       type: "url",
+      group: "main",
       description:
         "Bildet over blir en lenke hit. Uten lenke vises bildet uten at det kan klikkes.",
       validation: (rule) => rule.uri({ scheme: ["https"] }),
@@ -578,8 +608,30 @@ export const merchPage = defineType({
       name: "linkLabel",
       title: "Tekst på knappen",
       type: "string",
+      group: "main",
       description: 'Valgfritt. Standard er "Gå til nettbutikken".',
       validation: (rule) => rule.max(40),
+    }),
+
+    /* -------------------------------------------------------- Bli medlem --- */
+    defineField({
+      name: "ctaHeading",
+      title: "Overskrift",
+      type: "string",
+      group: "cta",
+      description:
+        'Den mørkegrønne seksjonen nederst på siden. Standard er "Støtt arbeidet".',
+      validation: (rule) => rule.max(70),
+    }),
+    defineField({
+      name: "ctaBody",
+      title: "Tekst",
+      type: "text",
+      rows: 3,
+      group: "cta",
+      description:
+        "Selve knappen peker til lenken du setter under Innstillinger.",
+      validation: (rule) => rule.max(300),
     }),
   ],
   preview: { prepare: () => ({ title: "Merch" }) },

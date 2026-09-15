@@ -54,8 +54,8 @@ export default async function MerchPage() {
       <div className="mt-20 sm:mt-28">
         <MembershipCTA
           membershipUrl={settings.membershipUrl}
-          heading="Støtt arbeidet"
-          body="Medlemskapet ditt betaler for lokaler, utstyr og turer. Det er det som gjør at aktivitetene kan være gratis eller nesten gratis."
+          heading={t(page?.ctaHeading, merchContent.ctaHeading)}
+          body={t(page?.ctaBody, merchContent.ctaBody)}
         />
       </div>
     </>

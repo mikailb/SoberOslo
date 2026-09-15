@@ -216,6 +216,9 @@ export const merchContent = {
   linkLabel: "Gå til nettbutikken",
   missingUrlNote:
     "Nettbutikken er ikke koblet til ennå. Legg inn adressen under Merch i Sanity.",
+  ctaHeading: "Støtt arbeidet",
+  ctaBody:
+    "Medlemskapet ditt betaler for lokaler, utstyr og turer. Det er det som gjør at aktivitetene kan være gratis eller nesten gratis.",
 } as const;
 
 const practicalBasics = [

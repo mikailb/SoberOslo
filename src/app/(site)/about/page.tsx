@@ -128,7 +128,11 @@ export default async function AboutPage() {
         </Container>
       </section>
 
-      <MembershipCTA membershipUrl={settings.membershipUrl} />
+      <MembershipCTA
+        membershipUrl={settings.membershipUrl}
+        heading={page ? (page.ctaHeading?.trim() ?? "") : undefined}
+        body={page ? (page.ctaBody?.trim() ?? "") : undefined}
+      />
     </>
   );
 }
