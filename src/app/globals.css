@@ -69,6 +69,14 @@
     text-wrap: pretty;
   }
 
+  /* Tailwind 4 leaves buttons on the default arrow cursor, so a clickable
+     thumbnail or menu toggle did not look clickable. Links already show the
+     hand, and this gives buttons the same. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   /* Visible, consistent keyboard focus everywhere. */
   :focus-visible {
     outline: 2px solid var(--color-green);
