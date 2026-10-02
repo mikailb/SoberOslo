@@ -7,21 +7,30 @@
    ========================================================================== */
 
 @theme {
-  --color-cream: #f6f3ec;
-  --color-paper: #fffcf5;
-  --color-ink: #16191a;
-  --color-muted: #5d6460;
-  --color-line: #e4dfd2;
+  /* The three brand colours from the logo sheet:
+     #f8eddd cream, #231f20 near-black, #ff914d orange.
+     The rest are shades derived from those three.
 
-  --color-green: #14624a;
-  --color-green-deep: #0e4535;
-  --color-green-ink: #08281f;
+     Note on names: `green` and `sage` are historical. They were green when the
+     site was first built and are now the brand orange and a warm tint. The
+     names are kept so the class names across the project stay stable. */
+  --color-cream: #f8eddd;
+  --color-paper: #fffaf3;
+  --color-ink: #231f20;
+  --color-muted: #6b625c;
+  --color-line: #e7d8c6;
 
-  --color-sage: #dce7db;
-  --color-sage-deep: #bcd0ba;
+  /* Brand orange, darkened enough to carry small text and white button labels.
+     Plain #ff914d only reaches 2.6:1 on cream, so it is never used for text. */
+  --color-green: #9c4a18;
+  --color-green-deep: #7e3a11;
+  --color-green-ink: #231f20;
 
-  --color-coral: #e4633c;
-  --color-coral-soft: #f7ddd2;
+  --color-sage: #fae3cd;
+  --color-sage-deep: #f2cba6;
+
+  --color-coral: #ff914d;
+  --color-coral-soft: #ffe0c7;
 
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",

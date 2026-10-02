@@ -82,6 +82,8 @@ export const homePageQuery = groq`
     heroHeading,
     heroIntro,
     heroImage ${imageFields},
+    heroPrimaryLabel,
+    heroPrimaryUrl,
 
     activitiesEyebrow,
     activitiesHeading,
@@ -156,8 +158,12 @@ export const merchPageQuery = groq`
     intro,
     shopUrl,
     linkLabel,
+    productsHeading,
+    "products": products[]{
+      _key, name, description, price, url, soldOut,
+      image ${imageFields}
+    },
     ctaHeading,
-    ctaBody,
-    image ${imageFields}
+    ctaBody
   }
 `;

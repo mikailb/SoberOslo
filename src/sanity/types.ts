@@ -91,12 +91,23 @@ export type SoberKvinnerPage = {
 };
 
 /** The shop itself lives on another site, so this is one picture and a link. */
+export type MerchProduct = {
+  _key: string;
+  name?: string | null;
+  description?: string | null;
+  price?: string | null;
+  image?: CmsImage | null;
+  url?: string | null;
+  soldOut?: boolean | null;
+};
+
 export type MerchPage = {
   heading?: string | null;
   intro?: string | null;
-  image?: CmsImage | null;
   shopUrl?: string | null;
   linkLabel?: string | null;
+  productsHeading?: string | null;
+  products?: MerchProduct[] | null;
   ctaHeading?: string | null;
   ctaBody?: string | null;
 };
@@ -112,6 +123,8 @@ export type HomePage = {
   heroHeading?: string | null;
   heroIntro?: string | null;
   heroImage?: CmsImage | null;
+  heroPrimaryLabel?: string | null;
+  heroPrimaryUrl?: string | null;
 
   activitiesEyebrow?: string | null;
   activitiesHeading?: string | null;

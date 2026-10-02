@@ -16,7 +16,12 @@ import {
   listFrom,
   textFrom,
 } from "@/lib/content";
-import { homeContent, soberKvinnerContent } from "@/lib/site";
+import {
+  SHOW_SOBER_KVINNER,
+  homeContent,
+  soberKvinnerContent,
+} from "@/lib/site";
+import { safeLinkHref } from "@/lib/urls";
 import type { CmsImage, HomeStat } from "@/sanity/types";
 
 export default async function HomePage() {
@@ -61,10 +66,14 @@ export default async function HomePage() {
     galleryIntro: t(page?.galleryIntro, homeContent.galleryIntro),
   };
 
-  // A button with no words on it would be broken rather than empty, so the
-  // label keeps its fallback.
+  // A button with no words on it, or with nowhere to go, would be broken rather
+  // than empty, so both of these keep their fallback.
   const kvinnerButtonLabel =
     page?.kvinnerButtonLabel?.trim() || homeContent.kvinnerButtonLabel;
+  const heroPrimaryLabel =
+    page?.heroPrimaryLabel?.trim() || homeContent.heroPrimaryLabel;
+  const heroPrimaryUrl =
+    safeLinkHref(page?.heroPrimaryUrl) ?? homeContent.heroPrimaryUrl;
 
   const stats = listFrom<HomeStat>(page)(page?.stats, homeContent.stats);
 
@@ -119,8 +128,8 @@ export default async function HomePage() {
                   animationDelay: "640ms",
                 }}
               >
-                <Button href="/activities" size="lg">
-                  Se aktiviteter
+                <Button href={heroPrimaryUrl} size="lg">
+                  {heroPrimaryLabel}
                 </Button>
                 <Button
                   href={settings.membershipUrl}
@@ -222,22 +231,26 @@ export default async function HomePage() {
       </section>
 
       {/* --------------------------------------------------- Sober Kvinner */}
-      <ImageSection
-        eyebrow="Sober Kvinner"
-        title={text.kvinnerHeading}
-        image={page?.kvinnerImage}
-        seed="sober-kvinner-home"
-        tone="sage"
-        reverse
-        className="mt-24 sm:mt-32"
-        action={
-          <Button href="/sober-kvinner" variant="primary">
-            {kvinnerButtonLabel}
-          </Button>
-        }
-      >
-        {text.kvinnerBody ? <p>{text.kvinnerBody}</p> : null}
-      </ImageSection>
+      {/* Hidden by the switch in lib/site.ts. The section and its Sanity fields
+          are kept so it can be brought back by flipping that one value. */}
+      {SHOW_SOBER_KVINNER ? (
+        <ImageSection
+          eyebrow="Sober Kvinner"
+          title={text.kvinnerHeading}
+          image={page?.kvinnerImage}
+          seed="sober-kvinner-home"
+          tone="sage"
+          reverse
+          className="mt-24 sm:mt-32"
+          action={
+            <Button href="/sober-kvinner" variant="primary">
+              {kvinnerButtonLabel}
+            </Button>
+          }
+        >
+          {text.kvinnerBody ? <p>{text.kvinnerBody}</p> : null}
+        </ImageSection>
+      ) : null}
 
       {/* --------------------------------------------------- Community images */}
       <section className="py-20 sm:py-28">

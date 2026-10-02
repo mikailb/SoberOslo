@@ -23,6 +23,9 @@ export const siteConfig = {
 
   contactEmail: "hei@soberoslo.no",
 
+  /** Shown in the orange strip at the very top of every page. */
+  slogan: "100% moro, 0% promille",
+
   /**
    * Only used before the settings exist in Sanity. After that the list under
    * Innstillinger -> Sosiale medier decides, including showing none at all.
@@ -48,13 +51,26 @@ export const siteConfig = {
   },
 } as const;
 
-export const navigation = [
+/**
+ * Sober Kvinner is hidden for now.
+ *
+ * Nothing is deleted: the page, its Sanity document and all of its content are
+ * untouched. This single switch takes it out of the menu, off the home page and
+ * out of the sitemap. Set it to `true` to bring the whole thing back.
+ */
+export const SHOW_SOBER_KVINNER = false;
+
+const ALL_NAVIGATION = [
   { href: "/", label: "Forside" },
   { href: "/activities", label: "Aktiviteter" },
   { href: "/sober-kvinner", label: "Sober Kvinner" },
   { href: "/about", label: "Om oss" },
   { href: "/merch", label: "Merch" },
 ] as const;
+
+export const navigation = ALL_NAVIGATION.filter(
+  (item) => SHOW_SOBER_KVINNER || item.href !== "/sober-kvinner",
+);
 
 export const categoryLabels: Record<ActivityCategory, string> = {
   social: "Sosialt",
@@ -101,6 +117,8 @@ export const homeContent = {
   heroHeading: "Gode opplevelser. Klare minner.",
   heroIntro:
     "Vi lager sosiale møteplasser i Oslo der du kan bli kjent med folk, prøve noe nytt og dra hjem med klart hode. Alt vi gjør er helt uten alkohol.",
+  heroPrimaryLabel: "Se aktiviteter",
+  heroPrimaryUrl: "/activities",
 
   activitiesEyebrow: "Hva skjer",
   activitiesHeading: "Kommende aktiviteter",
@@ -216,6 +234,7 @@ export const merchContent = {
   linkLabel: "Gå til nettbutikken",
   missingUrlNote:
     "Nettbutikken er ikke koblet til ennå. Legg inn adressen under Merch i Sanity.",
+  productsHeading: "Produkter",
   ctaHeading: "Støtt arbeidet",
   ctaBody:
     "Medlemskapet ditt betaler for lokaler, utstyr og turer. Det er det som gjør at aktivitetene kan være gratis eller nesten gratis.",

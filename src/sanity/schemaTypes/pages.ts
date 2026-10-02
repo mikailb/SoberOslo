@@ -120,6 +120,25 @@ export const homePage = defineType({
       description: "Setningene under overskriften.",
       validation: (rule) => rule.max(280),
     }),
+    defineField({
+      name: "heroPrimaryLabel",
+      title: "Tekst på den første knappen",
+      type: "string",
+      group: "hero",
+      description:
+        'Den mørke knappen under ingressen. Standard er "Se aktiviteter".',
+      validation: (rule) => rule.max(40),
+    }),
+    defineField({
+      name: "heroPrimaryUrl",
+      title: "Lenke fra den første knappen",
+      type: "url",
+      group: "hero",
+      description:
+        'Standard er aktivitetssiden. Skriv "/activities" for en side her på nettstedet, eller en full adresse som starter med https:// for et annet nettsted.',
+      validation: (rule) =>
+        rule.uri({ allowRelative: true, scheme: ["https"] }),
+    }),
     imageWithAlt("heroImage", "Bilde til høyre", "hero"),
 
     /* ---------------------------------------------- 2. Kommende aktiviteter */
@@ -574,7 +593,8 @@ export const merchPage = defineType({
   type: "document",
   groups: [
     { name: "main", title: "1. Merch", default: true },
-    { name: "cta", title: "2. Bli medlem" },
+    { name: "products", title: "2. Produkter" },
+    { name: "cta", title: "3. Bli medlem" },
   ],
   fields: [
     /* ------------------------------------------------------------ Merch ---- */
@@ -594,7 +614,6 @@ export const merchPage = defineType({
       group: "main",
       validation: (rule) => rule.max(300),
     }),
-    imageWithAlt("image", "Bilde", "main"),
     defineField({
       name: "shopUrl",
       title: "Lenke til nettbutikken",
@@ -613,6 +632,72 @@ export const merchPage = defineType({
       validation: (rule) => rule.max(40),
     }),
 
+    /* --------------------------------------------------------- Produkter --- */
+    defineField({
+      name: "productsHeading",
+      title: "Overskrift over produktene",
+      type: "string",
+      group: "products",
+      description: 'Standard er "Produkter".',
+      validation: (rule) => rule.max(70),
+    }),
+    defineField({
+      name: "products",
+      title: "Produkter",
+      type: "array",
+      group: "products",
+      description:
+        "Hvert produkt blir en boks på siden. Tre per rad på PC, to på nettbrett og mobil. Er listen tom, vises ingen produkter.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "product",
+          title: "Produkt",
+          fields: [
+            defineField({
+              name: "name",
+              title: "Navn",
+              type: "string",
+              validation: (rule) => rule.required().max(60),
+            }),
+            defineField({
+              name: "description",
+              title: "Kort beskrivelse",
+              type: "text",
+              rows: 2,
+              description: "Valgfritt. Én setning under navnet.",
+              validation: (rule) => rule.max(160),
+            }),
+            defineField({
+              name: "price",
+              title: "Pris",
+              type: "string",
+              description: 'Valgfritt. For eksempel "349 kr".',
+              validation: (rule) => rule.max(30),
+            }),
+            imageWithAlt("image", "Bilde"),
+            defineField({
+              name: "url",
+              title: "Lenke til produktet",
+              type: "url",
+              description:
+                "Valgfritt. Med en adresse her blir hele boksen klikkbar.",
+              validation: (rule) => rule.uri({ scheme: ["https"] }),
+            }),
+            defineField({
+              name: "soldOut",
+              title: "Utsolgt",
+              type: "boolean",
+              initialValue: false,
+            }),
+          ],
+          preview: {
+            select: { title: "name", subtitle: "price", media: "image" },
+          },
+        }),
+      ],
+    }),
+
     /* -------------------------------------------------------- Bli medlem --- */
     defineField({
       name: "ctaHeading",
@@ -620,7 +705,7 @@ export const merchPage = defineType({
       type: "string",
       group: "cta",
       description:
-        'Den mørkegrønne seksjonen nederst på siden. Standard er "Støtt arbeidet".',
+        'Den mørke seksjonen nederst på siden. Standard er "Støtt arbeidet".',
       validation: (rule) => rule.max(70),
     }),
     defineField({
