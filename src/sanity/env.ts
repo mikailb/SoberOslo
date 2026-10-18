@@ -1,9 +1,12 @@
 /**
  * Sanity connection settings.
  *
- * Only public values live here — a project id and a dataset name. There is no
- * write token anywhere in this project, so nothing secret can leak to the
- * browser. Content is read from the public CDN.
+ * Only public values live here — a project id and a dataset name. Content is
+ * read from the public CDN by the read-only client in `client.ts`.
+ *
+ * The one secret, `SANITY_WRITE_TOKEN`, is read in `writeClient.ts` and nowhere
+ * else. That file imports `server-only`, so the token is used by the ChatGPT
+ * connection at /api/mcp and can never reach the browser.
  */
 
 export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID?.trim() ?? "";

@@ -116,9 +116,11 @@ starter activities can never appear on a connected site.
 
 4. Invite the Sober Oslo editors from the project's Members tab.
 
-There is no write token in this project, and none is needed: content is read
-from the public CDN and the Studio authenticates each editor directly with
-Sanity.
+The website itself needs no write token: content is read from the public CDN
+and the Studio authenticates each editor directly with Sanity. The one write
+token, `SANITY_WRITE_TOKEN`, belongs to the ChatGPT connection and is only read
+on the server, in `src/sanity/writeClient.ts`. See
+[Koble ChatGPT til nettsiden](#koble-chatgpt-til-nettsiden).
 
 Note that the dataset is public. The website hides unpublished activities, but
 anyone who queries the API directly can read them, so do not stage anything
@@ -132,9 +134,14 @@ sensitive in a draft.
 | `NEXT_PUBLIC_SANITY_DATASET`     | yes      | Usually `production`                     |
 | `NEXT_PUBLIC_SANITY_API_VERSION` | no       | Defaults to `2024-10-01`                 |
 | `NEXT_PUBLIC_SITE_URL`           | no       | Used for canonical links and the sitemap |
+| `SANITY_WRITE_TOKEN`             | for ChatGPT | **Secret.** Sanity token, Editor role |
+| `MCP_ACCESS_TOKEN`               | for ChatGPT | **Secret.** Board password, 32+ characters |
+| `MCP_PUBLIC_URL`                 | no       | Overrides the origin used for OAuth      |
+| `MCP_OAUTH_EXTRA_REDIRECT_URIS`  | no       | Extra allowed OAuth redirect addresses   |
 
-All four are public by design. **Never add a secret with a `NEXT_PUBLIC_`
-prefix**, as those are compiled into the browser bundle.
+The four `NEXT_PUBLIC_` values are public by design. **Never add a secret with a
+`NEXT_PUBLIC_` prefix**, as those are compiled into the browser bundle. The two
+secrets are read only in server code that imports `server-only`.
 
 `NEXT_PUBLIC_SITE_URL` must be the real domain in production. Left unset it
 defaults to `https://soberoslo.no`; pointing it at localhost would put localhost
@@ -182,7 +189,12 @@ src/
     content.ts         reads the CMS and decides what each page shows
     format.ts          Norwegian dates and times
     urls.ts            validates links that come from the CMS
+    mcp/               the ChatGPT connection: tools, OAuth, validation,
+                       safe image download, rate limiting, audit log
+  app/api/mcp/         the MCP endpoint ChatGPT talks to
+  app/api/oauth/       login, token, registration and discovery for ChatGPT
   sanity/
+    writeClient.ts     server-only client with the write token
     schemaTypes/       the document types editors see
       imageRules.ts    rejects SVG uploads
     structure.ts       the Studio menu
@@ -235,8 +247,11 @@ upcoming between midnight and 01:00 or 02:00 Norwegian time.
 
 ### Security
 
-- No database, no API routes, no visitor accounts, no analytics or cookies.
-- No secrets: every environment variable is a public Sanity identifier.
+- No database, no visitor accounts, no analytics or cookies.
+- The only API routes are the ChatGPT connection under `/api/mcp` and
+  `/api/oauth`. Every MCP request needs a valid token, and the login page is
+  rate limited. Its two secrets, `SANITY_WRITE_TOKEN` and `MCP_ACCESS_TOKEN`,
+  are server-only. Everything else is a public Sanity identifier.
 - CMS text is rendered as React elements through Portable Text. There is no
   `dangerouslySetInnerHTML` anywhere, so content cannot inject markup.
 - Links from the CMS are validated in `src/lib/urls.ts`. Only `http(s)` and
@@ -294,4 +309,178 @@ npm run dev     # development server
 npm run build   # production build
 npm start       # serve the production build
 npm run lint    # ESLint
+npm run mcp:test     # checks the ChatGPT connection, see below
+npm run mcp:inspect  # opens MCP Inspector
 ```
+
+---
+
+## Koble ChatGPT til nettsiden
+
+Styret kan opprette og endre aktiviteter ved å skrive til ChatGPT, for eksempel
+«Lag en ny aktivitet: Spillkveld fredag 23. oktober kl. 18, gratis, på Deichman
+Bjørvika». ChatGPT er adminpanelet. Det finnes ingen egen chat på nettsiden.
+
+```
+ChatGPT  →  https://soberoslo.no/api/mcp  →  Sanity  →  nettsiden
+           (MCP over Streamable HTTP,      (skrive-token,
+            innlogging med OAuth)           bare på serveren)
+```
+
+ChatGPT krever OAuth for tilkoblinger med innlogging. Nettsiden har derfor en
+egen, enkel innloggingsside. Første gang tilkoblingen legges til, åpner ChatGPT
+den, og man skriver inn styrets passord (`MCP_ACCESS_TOKEN`). Etterpå husker
+ChatGPT innloggingen i opptil 60 dager.
+
+### 1. Lag et Sanity-token
+
+1. Gå til [sanity.io/manage](https://sanity.io/manage), velg prosjektet og
+   **API → Tokens → Add API token**.
+2. Gi det navnet `ChatGPT` og velg rollen **Editor**. Ikke velg Administrator,
+   for tokenet skal bare kunne endre innhold, ikke prosjektet.
+3. Kopier tokenet. Det vises bare én gang.
+
+### 2. Lag styrets passord
+
+Kjør dette og kopier det som skrives ut:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+
+Passordet må være minst 32 tegn, ellers er tilkoblingen slått av. Del det bare
+med styret, for eksempel i en passordbehandler.
+
+### 3. Legg inn miljøvariablene i Vercel
+
+Vercel → prosjektet → **Settings → Environment Variables**:
+
+| Navn                 | Verdi                    | Miljø      |
+| -------------------- | ------------------------ | ---------- |
+| `SANITY_WRITE_TOKEN` | tokenet fra steg 1       | Production |
+| `MCP_ACCESS_TOKEN`   | passordet fra steg 2     | Production |
+
+Kryss av for **Sensitive**. Bruk aldri `NEXT_PUBLIC_` foran disse navnene. Deploy
+på nytt etterpå, så variablene blir tatt i bruk.
+
+Lokalt legger du de samme verdiene i `.env.local`, som aldri sjekkes inn i git.
+
+### 4. Legg til tilkoblingen i ChatGPT
+
+Egne MCP-tilkoblinger krever **utviklermodus** i ChatGPT. Den finnes på nett
+(chatgpt.com) for Plus, Pro, Business, Enterprise og Edu. I et Business- eller
+Enterprise-arbeidsområde må en administrator slå det på først. OpenAI flytter
+menyene innimellom, så navnene kan avvike litt:
+
+1. Åpne **Innstillinger → Apper** (Apps & Connectors) **→ Avanserte innstillinger**
+   og slå på **Utviklermodus** (Developer mode).
+2. Velg **Opprett** (Create app) og fyll inn:
+   - **Navn:** Sober Oslo
+   - **Beskrivelse:** Opprett og endre aktiviteter på soberoslo.no
+   - **MCP-server-URL:** `https://soberoslo.no/api/mcp`
+   - **Autentisering:** OAuth
+3. Bekreft at du stoler på appen og trykk **Opprett**.
+4. Innloggingssiden til Sober Oslo åpnes. Skriv inn styrets passord og trykk
+   **Gi tilgang**.
+5. ChatGPT henter de sju verktøyene. I en ny samtale velger du **Sober Oslo**
+   under **+ → Mer** (eller utviklermodus-menyen) for å bruke den.
+
+ChatGPT spør alltid om bekreftelse før den oppretter, endrer, skjuler eller
+sletter noe. Verktøyene ber den i tillegg oppsummere først.
+
+### Eksempler på hva styret kan skrive
+
+- «Hvilke aktiviteter har vi fremover?»
+- «Lag en ny aktivitet: Spillkveld fredag 23. oktober kl. 18–21, gratis, på
+  Deichman Bjørvika, fjerde etasje. Kort beskrivelse: Brettspill og kaffe, alle
+  er velkomne.»
+- «Flytt spillkvelden til kl. 19 og sett pris til 50 kr.»
+- «Legg til i praktisk info at vi møtes ved inngangen.»
+- «Bruk dette bildet som hovedbilde på spillkvelden» (med bildet lastet opp i
+  chatten).
+- «Avlys turen på lørdag» gjør at aktiviteten skjules. Den slettes ikke.
+- «Slett testaktiviteten for godt» sletter permanent. ChatGPT må gjenta
+  tittelen for at det skal virke.
+
+Mangler dato, sted eller kort beskrivelse, spør ChatGPT i stedet for å gjette.
+«Fredag» og «neste uke» regnes ut fra dagens dato i norsk tid.
+
+### Verktøyene
+
+| Verktøy                   | Hva det gjør                                          |
+| ------------------------- | ----------------------------------------------------- |
+| `list_activities`         | Kommende aktiviteter, valgfritt tidligere og kategori |
+| `get_activity`            | Alle detaljer om én aktivitet, via id eller slug      |
+| `create_activity`         | Ny aktivitet. Slug lages fra tittelen og er unik      |
+| `update_activity`         | Endrer bare feltene som oppgis, og kan tømme felt     |
+| `set_activity_visibility` | Skjuler eller viser. Den vanlige måten å «slette» på  |
+| `delete_activity`         | Permanent sletting, krever `confirm` og tittelen      |
+| `upload_activity_image`   | Hovedbilde eller galleri, fra chatten eller en URL    |
+
+Endringer vises på nettsiden med en gang, fordi forsiden og
+aktivitetssidene oppdateres etter hver skriving. Har en aktivitet et
+upublisert utkast åpent i Studio, skrives endringen også dit, så neste Publish
+i Studio ikke overskriver den.
+
+### Sikkerhet
+
+- **Innlogging:** OAuth 2.1 med PKCE. Koder gjelder i fem minutter og kan bare
+  brukes én gang. Tilgangstokens gjelder i åtte timer og fornyes automatisk i
+  opptil 60 dager. Innloggingen kan bare sende brukeren tilbake til ChatGPT
+  eller til egen maskin (for testing).
+- **Logg ut alle:** bytt `MCP_ACCESS_TOKEN` i Vercel og deploy på nytt. Da slutter
+  alle tokens å virke, og styret må logge inn på nytt med det nye passordet.
+- **Begrensninger:** 10 innloggingsforsøk per 15 minutter, 120 forespørsler per
+  minutt og 60 endringer i timen per tilkobling. Grensene telles per
+  serverinstans, så de er et vern mot misbruk, ikke en eksakt kvote.
+- **Logg:** hver endring skrives til Vercels logg med prefikset `[mcp-audit]`:
+  tidspunkt, verktøy, dokument-id, feltnavn og hvilken klient det var.
+  Verdier og tokens logges ikke. Alle i styret deler samme passord, så loggen
+  viser hvilken tilkobling, ikke hvilken person.
+- **Bilder:** bare `https` på standardport. Private og lokale IP-adresser
+  blokkeres (sjekket ved hver tilkobling og hver videresending), maks 10 MB,
+  15 sekunders tidsgrense. Filtypen avgjøres av innholdet: bare JPG, PNG og
+  WebP. SVG avvises.
+- **CSP:** `/api/mcp` svarer med JSON, som ikke påvirkes av sidens Content
+  Security Policy. Innloggingssiden har sin egen, strengere policy uten
+  skript, fordi sidens `form-action 'self'` ellers ville stoppet
+  videresendingen tilbake til ChatGPT.
+
+### Test lokalt før du kobler til ChatGPT
+
+Legg `SANITY_WRITE_TOKEN` og `MCP_ACCESS_TOKEN` i `.env.local` og start
+utviklingsserveren:
+
+```bash
+npm run dev
+```
+
+**Rask sjekk med testskriptet**, i et nytt terminalvindu:
+
+```bash
+MCP_ACCESS_TOKEN=<passordet> npm run mcp:test            # bare lesing
+MCP_ACCESS_TOKEN=<passordet> npm run mcp:test -- --write # oppretter, endrer og
+                                                        # sletter en skjult testaktivitet
+```
+
+Det sjekker at uautoriserte kall avvises, at OAuth-oppsettet svarer, at alle
+sju verktøyene finnes, og at feil input gir norske feilmeldinger. Sett
+`MCP_URL=https://soberoslo.no/api/mcp` for å sjekke nettsiden etter deploy.
+
+**Prøv verktøyene for hånd med MCP Inspector:**
+
+```bash
+npm run mcp:inspect
+```
+
+1. Inspector åpnes i nettleseren. Velg **Transport Type: Streamable HTTP** og
+   **URL:** `http://localhost:3000/api/mcp`.
+2. Under **Authentication**: skriv `MCP_ACCESS_TOKEN` som **Bearer Token**.
+   Du kan også teste hele OAuth-innloggingen slik ChatGPT gjør det, med
+   **Open Auth Settings → Quick OAuth Flow**.
+3. Trykk **Connect**, så **Tools → List Tools**, og kjør for eksempel
+   `list_activities`.
+
+ChatGPT kan ikke nå `localhost`. For å teste mot ChatGPT før produksjon, bruk en
+preview-deploy på Vercel med de samme miljøvariablene, eller en tunnel som
+`ngrok http 3000`.

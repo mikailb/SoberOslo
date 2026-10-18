@@ -59,8 +59,38 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // OAuth discovery for the ChatGPT connection at /api/mcp. Clients look for
+  // these at fixed addresses, with or without the endpoint path appended.
+  async rewrites() {
+    return [
+      {
+        source: "/.well-known/oauth-protected-resource",
+        destination: "/api/oauth/protected-resource",
+      },
+      {
+        source: "/.well-known/oauth-protected-resource/:path*",
+        destination: "/api/oauth/protected-resource",
+      },
+      {
+        source: "/.well-known/oauth-authorization-server",
+        destination: "/api/oauth/metadata",
+      },
+      {
+        source: "/.well-known/oauth-authorization-server/:path*",
+        destination: "/api/oauth/metadata",
+      },
+    ];
+  },
+
   async headers() {
     return [
+      {
+        // The ChatGPT login page sets its own, stricter policy. The site policy
+        // would block it: `form-action 'self'` also stops the redirect back to
+        // ChatGPT after the form is sent, and two policies always combine.
+        source: "/api/oauth/authorize",
+        headers: baseHeaders,
+      },
       {
         // Sanity Studio loads its own assets and talks to the Sanity API, so it
         // is left out of the site policy. Access is controlled by Sanity login.
@@ -71,7 +101,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/((?!studio).*)",
+        source: "/((?!studio|api/oauth/authorize).*)",
         headers: [
           ...baseHeaders,
           { key: "X-Frame-Options", value: "DENY" },

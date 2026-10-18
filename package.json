@@ -6,9 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "mcp:test": "node scripts/mcp-smoke-test.mjs",
+    "mcp:inspect": "npx @modelcontextprotocol/inspector"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@portabletext/react": "^8.0.1",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^6.17.0",
@@ -17,7 +20,9 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "sanity": "^6.17.0",
-    "styled-components": "^6.5.3"
+    "server-only": "^0.0.1",
+    "styled-components": "^6.5.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
