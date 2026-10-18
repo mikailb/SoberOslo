@@ -1,11 +1,9 @@
 import "server-only";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { SanityClient } from "next-sanity";
 import { z } from "zod";
 
-import { todayIso } from "@/sanity/fetch";
 import { siteConfig } from "@/lib/site";
 
 import {
@@ -18,10 +16,17 @@ import {
   updateActivity,
   UserError,
 } from "./activities";
-import { auditLog, type Actor } from "./audit";
-import { OAUTH_SCOPE } from "./config";
-import { rateLimit } from "./rateLimit";
-import { detectImageFormat, DownloadError, downloadPublicFile } from "./safeDownload";
+import type { Actor } from "./audit";
+import { registerMerchTools } from "./merchTools";
+import {
+  chatFileSchema,
+  createToolHelpers,
+  fetchImage,
+  imageUrlSchema,
+  OAUTH_META,
+  READ_ANNOTATIONS,
+  todayInWords,
+} from "./toolHelpers";
 import {
   activityRefSchema,
   altSchema,
@@ -38,101 +43,26 @@ import {
   titleSchema,
 } from "./validation";
 
-/** Writes allowed per client per hour, on top of the request limit in the route. */
-const WRITES_PER_HOUR = 60;
-
-function todayInWords(): string {
-  const weekday = new Intl.DateTimeFormat("nb-NO", {
-    timeZone: "Europe/Oslo",
-    weekday: "long",
-  }).format(new Date());
-  return `${weekday} ${todayIso()}`;
-}
-
-const READ_ANNOTATIONS = {
-  readOnlyHint: true,
-  destructiveHint: false,
-  idempotentHint: true,
-  openWorldHint: false,
-} as const;
-
-const OAUTH_META = {
-  securitySchemes: [{ type: "oauth2", scopes: [OAUTH_SCOPE] }],
-};
-
-function ok(data: Record<string, unknown>): CallToolResult {
-  return {
-    content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-    structuredContent: data,
-  };
-}
-
-function fail(message: string): CallToolResult {
-  return { content: [{ type: "text", text: message }], isError: true };
-}
-
-/** Turns any failure into a message ChatGPT can pass on, without internals. */
-function explain(error: unknown): string {
-  if (error instanceof UserError || error instanceof DownloadError) return error.message;
-
-  const message = error instanceof Error ? error.message : String(error);
-  console.error("[mcp] Uventet feil:", error);
-  if (/permission|unauthorized|forbidden/i.test(message)) {
-    return "Sanity avviste forespørselen. Sjekk at SANITY_WRITE_TOKEN er gyldig, har rollen Editor og hører til riktig prosjekt.";
-  }
-  if (/reference/i.test(message)) {
-    return "Aktiviteten brukes et annet sted i Sanity og kan ikke slettes. Skjul den heller med set_activity_visibility.";
-  }
-  return "Noe gikk galt i kontakten med Sanity. Prøv igjen om litt. Ingenting er sikkert endret, så sjekk med get_activity.";
-}
-
 export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
   const today = todayInWords();
 
   const server = new McpServer(
-    { name: "sober-oslo-aktiviteter", title: "Sober Oslo – aktiviteter", version: "1.0.0" },
+    { name: "sober-oslo", title: "Sober Oslo – nettsiden", version: "1.1.0" },
     {
       instructions: [
-        `Du hjelper styret i Sober Oslo med å administrere aktivitetene på nettsiden ${siteConfig.url}.`,
+        `Du hjelper styret i Sober Oslo med å administrere aktivitetene og merch-siden på nettsiden ${siteConfig.url}.`,
         `I dag er det ${today} (tidssone Europe/Oslo). Bruk denne datoen for å tolke «fredag», «i morgen», «neste uke» og lignende. Mener brukeren en ukedag uten mer, velg den nærmeste kommende.`,
         "Svar på norsk.",
         "Før du oppretter, endrer, skjuler, sletter eller laster opp bilder: oppsummer nøyaktig hva som blir gjort (alle felt med verdier) og be om eksplisitt bekreftelse. Ikke kall skriveverktøyet før brukeren har sagt ja.",
-        "Mangler påkrevde felt (dato, sted, kort beskrivelse), spør brukeren i stedet for å gjette. Tittel kan du foreslå, men la brukeren godkjenne den.",
-        "Foretrekk å skjule (set_activity_visibility) fremfor å slette. Slett bare når brukeren ber om permanent sletting.",
-        "Etter en endring: oppgi lenken til aktiviteten på nettsiden.",
+        "Mangler påkrevde felt (for aktiviteter: dato, sted, kort beskrivelse), spør brukeren i stedet for å gjette. Tittel kan du foreslå, men la brukeren godkjenne den.",
+        "Foretrekk å skjule (set_activity_visibility) fremfor å slette aktiviteter, og å merke merch som utsolgt fremfor å fjerne produkter. Slett bare når brukeren ber om permanent sletting.",
+        "Etter en endring: oppgi lenken til siden på nettsiden.",
       ].join("\n"),
     },
   );
 
-  const guarded = async (
-    tool: string,
-    run: () => Promise<{ result: Record<string, unknown>; documentId?: string; fields?: string[] }>,
-  ): Promise<CallToolResult> => {
-    const limit = rateLimit(`mcp-write:${actor.key}`, WRITES_PER_HOUR, 60 * 60 * 1000);
-    if (!limit.ok) {
-      return fail(
-        `For mange endringer på kort tid. Vent ${Math.ceil(limit.retryAfter / 60)} minutter og prøv igjen.`,
-      );
-    }
-
-    try {
-      const { result, documentId, fields } = await run();
-      auditLog({ tool, actor, documentId, fields, outcome: "ok" });
-      return ok({ today: todayIso(), ...result });
-    } catch (error) {
-      const message = explain(error);
-      auditLog({ tool, actor, outcome: "error", message });
-      return fail(message);
-    }
-  };
-
-  const read = async (run: () => Promise<Record<string, unknown>>) => {
-    try {
-      return ok(await run());
-    } catch (error) {
-      return fail(explain(error));
-    }
-  };
+  const helpers = createToolHelpers(actor);
+  const { guarded, read } = helpers;
 
   /* ------------------------------------------------- list_activities --- */
 
@@ -385,15 +315,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
 
   /* ------------------------------------------ upload_activity_image --- */
 
-  const fileSchema = z
-    .object({
-      download_url: z.string().describe("Nedlastingsadresse fra ChatGPT."),
-      file_id: z.string().describe("Fil-id fra ChatGPT."),
-      mime_type: z.string().optional(),
-      file_name: z.string().optional(),
-    })
-    .describe("Et bilde brukeren har lastet opp i chatten.");
-
   server.registerTool(
     "upload_activity_image",
     {
@@ -407,13 +328,8 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
       ].join("\n"),
       inputSchema: {
         activity: activityRefSchema,
-        imageFile: fileSchema.optional(),
-        imageUrl: z
-          .string()
-          .trim()
-          .max(2000)
-          .optional()
-          .describe("Offentlig https-adresse til bildet."),
+        imageFile: chatFileSchema.optional(),
+        imageUrl: imageUrlSchema.optional(),
         target: z
           .enum(["cover", "gallery"], { error: "target må være cover eller gallery." })
           .default("cover")
@@ -435,20 +351,8 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
     },
     async ({ activity, imageFile, imageUrl, target, alt }) =>
       guarded("upload_activity_image", async () => {
-        const source = imageFile?.download_url ?? imageUrl;
-        if (!source) {
-          throw new UserError("Oppgi enten et opplastet bilde (imageFile) eller en bildeadresse (imageUrl).");
-        }
-
-        const download = await downloadPublicFile(source);
-        const format = detectImageFormat(download.body, download.contentType);
-        const result = await attachImage(
-          client,
-          activity,
-          { body: download.body, ...format },
-          target,
-          alt,
-        );
+        const image = await fetchImage(imageFile, imageUrl);
+        const result = await attachImage(client, activity, image, target, alt);
         return {
           result: { uploaded: true, ...result },
           documentId: result.id,
@@ -456,6 +360,8 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
         };
       }),
   );
+
+  registerMerchTools(server, client, helpers);
 
   return server;
 }

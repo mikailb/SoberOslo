@@ -5,7 +5,10 @@
  *   MCP_ACCESS_TOKEN=... npm run mcp:test                 read-only checks
  *   MCP_ACCESS_TOKEN=... npm run mcp:test -- --write      also creates, edits,
  *                                                          hides and deletes a
- *                                                          hidden test activity
+ *                                                          hidden test activity,
+ *                                                          and adds, edits and
+ *                                                          removes a sold-out
+ *                                                          test product
  *
  * MCP_URL defaults to http://localhost:3000/api/mcp. Point it at the live site
  * to check a deployment: MCP_URL=https://soberoslo.no/api/mcp
@@ -96,16 +99,26 @@ const expected = [
   "set_activity_visibility",
   "delete_activity",
   "upload_activity_image",
+  "get_merch_page",
+  "update_merch_page",
+  "add_merch_product",
+  "update_merch_product",
+  "remove_merch_product",
+  "upload_merch_product_image",
 ];
 check(
   expected.every((name) => tools.some((tool) => tool.name === name)),
-  "Alle sju verktøy finnes",
+  `Alle ${expected.length} verktøy finnes`,
   tools.map((tool) => tool.name).join(", "),
 );
-const readOnly = tools.filter((tool) => tool.annotations?.readOnlyHint).map((tool) => tool.name);
+const readOnly = tools
+  .filter((tool) => tool.annotations?.readOnlyHint)
+  .map((tool) => tool.name)
+  .sort();
 check(
-  readOnly.length === 2 && readOnly.includes("list_activities") && readOnly.includes("get_activity"),
+  readOnly.join() === ["get_activity", "get_merch_page", "list_activities"].join(),
   "Bare lese-verktøyene er merket read-only",
+  readOnly.join(", "),
 );
 
 // 4. A read and a validation error.
@@ -119,6 +132,12 @@ const invalid = await callTool("create_activity", {
   shortDescription: "Test",
 });
 check(invalid.isError && /ÅÅÅÅ-MM-DD/.test(invalid.text), "Feil datoformat gir norsk feilmelding");
+
+const merch = await callTool("get_merch_page", {});
+check(!merch.isError, "get_merch_page", merch.isError ? merch.text : `${merch.data?.products?.length ?? 0} produkter`);
+
+const badShop = await callTool("update_merch_page", { shopUrl: "http://butikk.no" });
+check(badShop.isError && /https:\/\//.test(badShop.text), "Butikklenke uten https gir norsk feilmelding");
 
 // 5. Optional full write cycle on a hidden activity.
 if (write) {
@@ -155,6 +174,37 @@ if (write) {
 
     const deleted = await callTool("delete_activity", { activity: id, confirm: true, confirmTitle: title });
     check(!deleted.isError, "delete_activity", deleted.isError ? deleted.text : "");
+  }
+
+  // The test product is visible on /merch for the few seconds this takes.
+  const productName = `MCP-test ${Date.now()}`;
+  const added = await callTool("add_merch_product", {
+    name: productName,
+    price: "1 kr",
+    soldOut: true,
+    position: "last",
+  });
+  check(!added.isError, "add_merch_product", added.isError ? added.text : added.data?.key);
+  const key = added.data?.key;
+
+  if (key) {
+    const changed = await callTool("update_merch_product", {
+      product: key,
+      price: "2 kr",
+      moveTo: "first",
+    });
+    check(!changed.isError, "update_merch_product (pris og flytting)", changed.isError ? changed.text : "");
+
+    const page = await callTool("get_merch_page", {});
+    const first = page.data?.products?.[0];
+    check(first?.key === key && first?.price === "2 kr", "get_merch_page viser endringen først i listen");
+
+    const removed = await callTool("remove_merch_product", {
+      product: key,
+      confirm: true,
+      confirmName: productName,
+    });
+    check(!removed.isError, "remove_merch_product", removed.isError ? removed.text : "");
   }
 }
 

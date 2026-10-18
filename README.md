@@ -317,9 +317,10 @@ npm run mcp:inspect  # opens MCP Inspector
 
 ## Koble ChatGPT til nettsiden
 
-Styret kan opprette og endre aktiviteter ved å skrive til ChatGPT, for eksempel
-«Lag en ny aktivitet: Spillkveld fredag 23. oktober kl. 18, gratis, på Deichman
-Bjørvika». ChatGPT er adminpanelet. Det finnes ingen egen chat på nettsiden.
+Styret kan opprette og endre aktiviteter og merch-siden ved å skrive til
+ChatGPT, for eksempel «Lag en ny aktivitet: Spillkveld fredag 23. oktober kl. 18,
+gratis, på Deichman Bjørvika» eller «Legg til en hettegenser til 499 kr på
+merch-siden». ChatGPT er adminpanelet. Det finnes ingen egen chat på nettsiden.
 
 ```
 ChatGPT  →  https://soberoslo.no/api/mcp  →  Sanity  →  nettsiden
@@ -376,14 +377,18 @@ menyene innimellom, så navnene kan avvike litt:
    og slå på **Utviklermodus** (Developer mode).
 2. Velg **Opprett** (Create app) og fyll inn:
    - **Navn:** Sober Oslo
-   - **Beskrivelse:** Opprett og endre aktiviteter på soberoslo.no
+   - **Beskrivelse:** Opprett og endre aktiviteter og merch på soberoslo.no
    - **MCP-server-URL:** `https://soberoslo.no/api/mcp`
    - **Autentisering:** OAuth
 3. Bekreft at du stoler på appen og trykk **Opprett**.
 4. Innloggingssiden til Sober Oslo åpnes. Skriv inn styrets passord og trykk
    **Gi tilgang**.
-5. ChatGPT henter de sju verktøyene. I en ny samtale velger du **Sober Oslo**
+5. ChatGPT henter de 13 verktøyene. I en ny samtale velger du **Sober Oslo**
    under **+ → Mer** (eller utviklermodus-menyen) for å bruke den.
+
+Er tilkoblingen allerede lagt til fra før merch-verktøyene kom, åpner du appen
+i ChatGPT-innstillingene og trykker **Oppdater** (Refresh), så hentes de nye
+verktøyene.
 
 ChatGPT spør alltid om bekreftelse før den oppretter, endrer, skjuler eller
 sletter noe. Verktøyene ber den i tillegg oppsummere først.
@@ -405,6 +410,19 @@ sletter noe. Verktøyene ber den i tillegg oppsummere først.
 Mangler dato, sted eller kort beskrivelse, spør ChatGPT i stedet for å gjette.
 «Fredag» og «neste uke» regnes ut fra dagens dato i norsk tid.
 
+Merch-siden:
+
+- «Hva ligger på merch-siden nå?»
+- «Legg til en hettegenser, svart, 499 kr, med lenke til
+  https://butikk.soberoslo.no/hettegenser. Sett den først.»
+- «Bruk dette bildet på hettegenseren» (med bildet lastet opp i chatten).
+- «T-skjorta er utsolgt» merker produktet som utsolgt. Det vises med merket
+  «Utsolgt» og lenker ikke til butikken.
+- «Endre ingressen på merch-siden til …»
+- «Bytt lenken til nettbutikken til https://…»
+- «Fjern kopphylla fra merch-siden» fjerner produktet for godt. ChatGPT må
+  gjenta produktnavnet for at det skal virke.
+
 ### Verktøyene
 
 | Verktøy                   | Hva det gjør                                          |
@@ -417,10 +435,23 @@ Mangler dato, sted eller kort beskrivelse, spør ChatGPT i stedet for å gjette.
 | `delete_activity`         | Permanent sletting, krever `confirm` og tittelen      |
 | `upload_activity_image`   | Hovedbilde eller galleri, fra chatten eller en URL    |
 
-Endringer vises på nettsiden med en gang, fordi forsiden og
-aktivitetssidene oppdateres etter hver skriving. Har en aktivitet et
-upublisert utkast åpent i Studio, skrives endringen også dit, så neste Publish
-i Studio ikke overskriver den.
+| Verktøy                      | Hva det gjør                                         |
+| ---------------------------- | ---------------------------------------------------- |
+| `get_merch_page`             | Tekstene og alle produktene på merch-siden           |
+| `update_merch_page`          | Overskrift, ingress, butikklenke, knappetekst og «Støtt arbeidet»-boksen |
+| `add_merch_product`          | Nytt produkt, først eller sist i listen              |
+| `update_merch_product`       | Navn, pris, beskrivelse, lenke, utsolgt, rekkefølge  |
+| `remove_merch_product`       | Fjerner for godt, krever `confirm` og produktnavnet  |
+| `upload_merch_product_image` | Produktbilde, fra chatten eller en URL               |
+
+Endringer vises på nettsiden med en gang, fordi sidene som berøres oppdateres
+etter hver skriving. Har en aktivitet eller merch-siden et upublisert utkast
+åpent i Studio, skrives endringen også dit, så neste Publish i Studio ikke
+overskriver den.
+
+Et tomt tekstfelt på merch-siden betyr at teksten forsvinner fra nettsiden,
+akkurat som i Studio. Finnes ikke merch-siden i Sanity fra før, opprettes den
+med standardtekstene første gang ChatGPT endrer noe, så siden ikke blir tom.
 
 ### Sikkerhet
 
@@ -459,12 +490,14 @@ npm run dev
 
 ```bash
 MCP_ACCESS_TOKEN=<passordet> npm run mcp:test            # bare lesing
-MCP_ACCESS_TOKEN=<passordet> npm run mcp:test -- --write # oppretter, endrer og
-                                                        # sletter en skjult testaktivitet
+MCP_ACCESS_TOKEN=<passordet> npm run mcp:test -- --write # også skriving, se under
 ```
 
 Det sjekker at uautoriserte kall avvises, at OAuth-oppsettet svarer, at alle
-sju verktøyene finnes, og at feil input gir norske feilmeldinger. Sett
+13 verktøyene finnes, og at feil input gir norske feilmeldinger. Med `--write`
+opprettes, endres og slettes også en skjult testaktivitet, og et utsolgt
+testprodukt legges til på merch-siden og fjernes igjen. Det er synlig der i
+noen sekunder. Sett
 `MCP_URL=https://soberoslo.no/api/mcp` for å sjekke nettsiden etter deploy.
 
 **Prøv verktøyene for hånd med MCP Inspector:**
