@@ -9,16 +9,6 @@ import { UserError } from "./activities";
 import { newKey } from "./portableText";
 import type { DownloadedImage } from "./toolHelpers";
 
-/**
- * Everything the ChatGPT tools do to the merch page.
- *
- * The page is one document with the fixed id `merchPage`: some page texts and
- * a list of products. Products are found by their `_key`, or by name.
- *
- * Changes go to the published document, and to the Studio draft too when one
- * is open, so the next Publish in the Studio does not undo them.
- */
-
 const PAGE_ID = "merchPage";
 const DRAFT_ID = `drafts.${PAGE_ID}`;
 
@@ -88,13 +78,6 @@ async function loadVersions(client: SanityClient) {
   };
 }
 
-/**
- * Makes sure the published page exists before anything is written to it.
- *
- * Once the page exists, an empty field means "no text" on the website. A new
- * page is therefore filled with the standard wording first, so that changing
- * one field does not wipe out every other text on the page.
- */
 async function ensurePage(client: SanityClient) {
   const versions = await loadVersions(client);
   if (versions.published) return versions;
@@ -197,7 +180,6 @@ export async function updateMerchTexts(
   };
 }
 
-/** Finds one product by key, or by name when that is unambiguous. */
 function findProduct(products: RawProduct[], ref: string): RawProduct {
   const wanted = ref.trim();
   const byKey = products.find((product) => product._key === wanted);
@@ -218,7 +200,6 @@ function findProduct(products: RawProduct[], ref: string): RawProduct {
   );
 }
 
-/** The page versions that contain the product, so a patch never misses. */
 async function versionsWithProduct(client: SanityClient, ref: string) {
   const { published, draft } = await loadVersions(client);
   const product = findProduct(published?.products ?? draft?.products ?? [], ref);
@@ -307,8 +288,6 @@ export async function updateProduct(
   }
   await transaction.commit();
 
-  // Moving rewrites the order of the whole list, so it is done afterwards on
-  // fresh data and refused if someone changed the page in between.
   if (moveTo) {
     const reorder = client.transaction();
     for (const id of [PAGE_ID, DRAFT_ID]) {

@@ -1,13 +1,5 @@
 import "server-only";
 
-/**
- * Fixed-window rate limiting held in memory.
- *
- * Deliberately simple: each server instance counts on its own, so on Vercel
- * the real ceiling is the limit times the number of warm instances. That is
- * plenty to stop password guessing and a runaway loop, which is the point.
- */
-
 type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();

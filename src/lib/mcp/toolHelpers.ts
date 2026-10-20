@@ -16,9 +16,6 @@ import {
   type ImageFormat,
 } from "./safeDownload";
 
-/** Shared plumbing for every tool: results, errors, the write guard, images. */
-
-/** Writes allowed per client per hour, on top of the request limit in the route. */
 const WRITES_PER_HOUR = 60;
 
 export const READ_ANNOTATIONS = {
@@ -51,7 +48,6 @@ function fail(message: string): CallToolResult {
   return { content: [{ type: "text", text: message }], isError: true };
 }
 
-/** Turns any failure into a message ChatGPT can pass on, without internals. */
 function explain(error: unknown): string {
   if (error instanceof UserError || error instanceof DownloadError) return error.message;
 
@@ -76,7 +72,6 @@ export type WriteOutcome = {
 };
 
 export function createToolHelpers(actor: Actor) {
-  /** Rate-limits, runs, audit-logs and formats a tool that writes. */
   const guarded = async (
     tool: string,
     run: () => Promise<WriteOutcome>,
@@ -112,9 +107,6 @@ export function createToolHelpers(actor: Actor) {
 
 export type ToolHelpers = ReturnType<typeof createToolHelpers>;
 
-/* ---------------------------------------------------------------- Images */
-
-/** The file object ChatGPT passes for a file uploaded in the chat. */
 export const chatFileSchema = z
   .object({
     download_url: z.string().describe("Nedlastingsadresse fra ChatGPT."),
@@ -132,7 +124,6 @@ export const imageUrlSchema = z
 
 export type DownloadedImage = ImageFormat & { body: Buffer };
 
-/** Downloads a chat upload or a public URL and checks it is JPG, PNG or WebP. */
 export async function fetchImage(
   imageFile: { download_url: string } | undefined,
   imageUrl: string | undefined,

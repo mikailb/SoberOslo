@@ -1,18 +1,4 @@
 #!/usr/bin/env node
-/**
- * Quick check of the ChatGPT connection before it is added in ChatGPT.
- *
- *   MCP_ACCESS_TOKEN=... npm run mcp:test                 read-only checks
- *   MCP_ACCESS_TOKEN=... npm run mcp:test -- --write      also creates, edits,
- *                                                          hides and deletes a
- *                                                          hidden test activity,
- *                                                          and adds, edits and
- *                                                          removes a sold-out
- *                                                          test product
- *
- * MCP_URL defaults to http://localhost:3000/api/mcp. Point it at the live site
- * to check a deployment: MCP_URL=https://soberoslo.no/api/mcp
- */
 
 const url = process.env.MCP_URL ?? "http://localhost:3000/api/mcp";
 const token = process.env.MCP_ACCESS_TOKEN;
@@ -60,7 +46,6 @@ async function callTool(name, args) {
 
 const origin = new URL(url).origin;
 
-// 1. Without a token the endpoint must refuse and point at the OAuth metadata.
 const anonymous = await rpc("tools/list", {}, null);
 check(anonymous.status === 401, "Avviser forespørsel uten token", `HTTP ${anonymous.status}`);
 check(
@@ -71,7 +56,6 @@ check(
 const wrong = await rpc("tools/list", {}, "feil-token");
 check(wrong.status === 401, "Avviser feil token", `HTTP ${wrong.status}`);
 
-// 2. OAuth discovery documents.
 const prm = await fetch(`${origin}/.well-known/oauth-protected-resource`).then((r) => r.json());
 check(prm.resource === url, "Protected resource metadata", prm.resource);
 const asMeta = await fetch(`${origin}/.well-known/oauth-authorization-server`).then((r) => r.json());
@@ -81,7 +65,6 @@ check(
   asMeta.issuer,
 );
 
-// 3. MCP handshake and tool list.
 const init = await rpc("initialize", {
   protocolVersion: "2025-06-18",
   capabilities: {},
@@ -121,7 +104,6 @@ check(
   readOnly.join(", "),
 );
 
-// 4. A read and a validation error.
 const upcoming = await callTool("list_activities", {});
 check(!upcoming.isError, "list_activities", upcoming.isError ? upcoming.text : `${upcoming.data?.count} kommende`);
 
@@ -139,7 +121,6 @@ check(!merch.isError, "get_merch_page", merch.isError ? merch.text : `${merch.da
 const badShop = await callTool("update_merch_page", { shopUrl: "http://butikk.no" });
 check(badShop.isError && /https:\/\//.test(badShop.text), "Butikklenke uten https gir norsk feilmelding");
 
-// 5. Optional full write cycle on a hidden activity.
 if (write) {
   const title = `MCP-test ${new Date().toISOString().slice(0, 19)}`;
   const created = await callTool("create_activity", {
@@ -176,7 +157,6 @@ if (write) {
     check(!deleted.isError, "delete_activity", deleted.isError ? deleted.text : "");
   }
 
-  // The test product is visible on /merch for the few seconds this takes.
   const productName = `MCP-test ${Date.now()}`;
   const added = await callTool("add_merch_product", {
     name: productName,

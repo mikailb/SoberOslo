@@ -4,12 +4,6 @@ import { z } from "zod";
 
 import { categoryLabels } from "@/lib/site";
 
-/**
- * Input rules for the ChatGPT tools. They mirror
- * src/sanity/schemaTypes/activity.ts exactly, and every message is Norwegian
- * so ChatGPT can pass it straight on to the person asking.
- */
-
 export const CATEGORIES = [
   "social",
   "outdoors",
@@ -114,7 +108,6 @@ export const altSchema = z
   .max(250, "Bildebeskrivelsen kan være maks 250 tegn.")
   .describe("Kort beskrivelse av hva bildet viser, for skjermlesere.");
 
-/** Fields that can be emptied with update_activity. */
 export const CLEARABLE_FIELDS = [
   "startTime",
   "endTime",
@@ -128,10 +121,6 @@ export const CLEARABLE_FIELDS = [
 
 export type ClearableField = (typeof CLEARABLE_FIELDS)[number];
 
-/**
- * An end time before the start time is almost always a typo. Activities that
- * run past midnight can leave the end time empty.
- */
 export function checkTimes(
   startTime: string | null | undefined,
   endTime: string | null | undefined,

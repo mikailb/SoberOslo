@@ -13,14 +13,6 @@ import { rateLimit } from "@/lib/mcp/rateLimit";
 import { createMcpServer } from "@/lib/mcp/server";
 import { writeClient } from "@/sanity/writeClient";
 
-/**
- * The MCP endpoint ChatGPT connects to (Streamable HTTP, stateless).
- *
- * Every request is authenticated, then gets a fresh server and transport, so
- * nothing is kept between requests and it runs fine on serverless functions.
- * Responses are plain JSON rather than an event stream.
- */
-
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -86,7 +78,6 @@ export async function POST(request: Request): Promise<Response> {
   return withCors(await transport.handleRequest(request));
 }
 
-/** Stateless server: no event stream to open and no session to end. */
 function methodNotAllowed(): Response {
   return jsonResponse(
     {

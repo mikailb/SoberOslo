@@ -59,8 +59,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // OAuth discovery for the ChatGPT connection at /api/mcp. Clients look for
-  // these at fixed addresses, with or without the endpoint path appended.
   async rewrites() {
     return [
       {
@@ -85,9 +83,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // The ChatGPT login page sets its own, stricter policy. The site policy
-        // would block it: `form-action 'self'` also stops the redirect back to
-        // ChatGPT after the form is sent, and two policies always combine.
         source: "/api/oauth/authorize",
         headers: baseHeaders,
       },

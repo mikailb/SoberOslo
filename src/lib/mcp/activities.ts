@@ -12,14 +12,6 @@ import { blocksToText, newKey, textToBlocks } from "./portableText";
 import { slugCandidates, slugify } from "./slug";
 import { checkTimes, type ClearableField } from "./validation";
 
-/**
- * Everything the ChatGPT tools do to activities in Sanity.
- *
- * Documents created here are published straight away. When an activity also
- * has an unpublished draft open in the Studio, every change is written to the
- * draft as well, so the next Publish in the Studio does not undo it.
- */
-
 export class UserError extends Error {}
 
 export type ActivityInput = {
@@ -48,9 +40,7 @@ const baseId = (id: string) =>
 const activityUrl = (slug: string | null | undefined) =>
   slug ? `${siteConfig.url.replace(/\/$/, "")}/activities/${slug}` : null;
 
-/* ------------------------------------------------------------- Reading --- */
-
-const summaryProjection = /* groq */ `{
+const summaryProjection =  `{
   _id,
   title,
   "slug": slug.current,
@@ -63,7 +53,7 @@ const summaryProjection = /* groq */ `{
   isPublished
 }`;
 
-const fullProjection = /* groq */ `{
+const fullProjection =  `{
   _id,
   _updatedAt,
   title,
@@ -106,10 +96,6 @@ type RawActivity = RawSummary & {
   gallery?: { _key: string; alt?: string | null; url?: string | null }[] | null;
 };
 
-/**
- * Collapses published and draft versions into one entry per activity. The
- * published version wins, because that is what the website shows.
- */
 function mergeVersions<T extends { _id: string }>(docs: T[]) {
   const byId = new Map<string, { doc: T; ids: string[]; hasDraft: boolean; isLive: boolean }>();
 
@@ -184,7 +170,6 @@ export async function listActivities(
   return { today, count: activities.length, activities };
 }
 
-/** Finds an activity by document id (with or without `drafts.`) or by slug. */
 async function findActivity(client: SanityClient, ref: string) {
   const id = baseId(ref.trim());
   const docs = await client.fetch<RawActivity[]>(
@@ -229,8 +214,6 @@ export async function getActivity(client: SanityClient, ref: string) {
   };
 }
 
-/* ------------------------------------------------------------- Writing --- */
-
 async function uniqueSlug(
   client: SanityClient,
   title: string,
@@ -253,10 +236,6 @@ async function uniqueSlug(
   return free;
 }
 
-/**
- * Refreshes the pages that list or show activities so a change is visible at
- * once instead of after the normal 60-second cache.
- */
 export function revalidateActivityPages(slug?: string | null) {
   const paths: [string, ("page" | "layout")?][] = [
     ["/"],

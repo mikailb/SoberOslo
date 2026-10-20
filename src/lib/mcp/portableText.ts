@@ -4,14 +4,6 @@ import { randomBytes } from "node:crypto";
 
 import { safeLinkHref } from "@/lib/urls";
 
-/**
- * Converts the plain text ChatGPT writes into the Portable Text that the
- * `blockContent` type stores, and back again for reading.
- *
- * Only what blockContent allows is produced: paragraphs, h3, blockquote,
- * bullet and numbered lists, bold, italic and links.
- */
-
 type Span = { _type: "span"; _key: string; text: string; marks: string[] };
 type LinkDef = { _type: "link"; _key: string; href: string };
 
@@ -44,7 +36,6 @@ function parseInline(text: string): Pick<TextBlock, "markDefs" | "children"> {
     if (bold !== undefined) push(bold, ["strong"]);
     else if (italic !== undefined) push(italic, ["em"]);
     else {
-      // Only http(s) and mailto survive, the same rule the site uses to render.
       const href = safeLinkHref(linkHref);
       if (href && !href.startsWith("/")) {
         const key = newKey();
@@ -120,7 +111,6 @@ type LooseBlock = {
   children?: { text?: string; marks?: string[] }[];
 };
 
-/** The reverse, so ChatGPT can read and quote existing text. */
 export function blocksToText(blocks: unknown): string {
   if (!Array.isArray(blocks)) return "";
 
@@ -153,7 +143,6 @@ export function blocksToText(blocks: unknown): string {
     return text;
   });
 
-  // List items sit on consecutive lines; everything else is separated by a blank line.
   return lines
     .map((line, index) =>
       index === 0

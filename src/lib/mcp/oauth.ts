@@ -11,22 +11,6 @@ import {
 import type { Actor } from "./audit";
 import { extraRedirectUris, OAUTH_SCOPE } from "./config";
 
-/**
- * A minimal OAuth 2.1 authorization server for the ChatGPT connection.
- *
- * ChatGPT only supports OAuth (authorization code + PKCE) for connectors that
- * need a login; it cannot send a fixed API key. There is no database here, so
- * every OAuth value is a self-contained, HMAC-signed token:
- *
- *   client id  -> the registered name and redirect addresses
- *   code       -> PKCE challenge, redirect address, five-minute expiry
- *   access     -> the audience (/api/mcp), eight-hour expiry
- *   refresh    -> sixty-day expiry
- *
- * The signing key is derived from MCP_ACCESS_TOKEN. Change that value and every
- * client id, code and token issued so far stops working.
- */
-
 const PREFIX = "so1";
 
 export const CODE_TTL_SECONDS = 5 * 60;
@@ -37,23 +21,17 @@ export type ClientAuthMethod = "none" | "client_secret_post" | "client_secret_ba
 
 type ClientPayload = {
   typ: "client";
-  /** Client name. */
   n: string;
-  /** Registered redirect addresses. */
   r: string[];
-  /** Token endpoint authentication method. */
   m: ClientAuthMethod;
   iat: number;
 };
 
 type CodePayload = {
   typ: "code";
-  /** Fingerprint of the client id. */
   cid: string;
   cn: string;
-  /** Redirect address the code was issued for. */
   r: string;
-  /** PKCE S256 challenge. */
   cc: string;
   aud: string;
   scope: string;
@@ -114,33 +92,20 @@ function verify<T extends Payload>(
   return payload as T;
 }
 
-/**
- * Constant-time comparison. Both sides are hashed first so the comparison
- * time does not reveal the length of the secret either.
- */
 export function safeEqual(a: string, b: string): boolean {
   const left = createHash("sha256").update(a).digest();
   const right = createHash("sha256").update(b).digest();
   return timingSafeEqual(left, right);
 }
 
-/** Short fingerprint for logs and for binding codes and tokens to a client. */
 export function fingerprint(value: string): string {
   return createHash("sha256").update(value).digest("base64url").slice(0, 16);
 }
 
 const randomId = () => randomBytes(16).toString("base64url");
 
-/* ------------------------------------------------------- Redirects ----- */
-
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-/**
- * Codes may only be sent back to ChatGPT, to the local machine (MCP Inspector
- * and other desktop tools), or to an address listed in
- * MCP_OAUTH_EXTRA_REDIRECT_URIS. Anything else could be used to trick a board
- * member into handing a code to someone else.
- */
 export function isAllowedRedirectUri(value: string): boolean {
   let url: URL;
   try {
@@ -163,8 +128,6 @@ export function isAllowedRedirectUri(value: string): boolean {
 
   return url.protocol === "http:" && LOOPBACK_HOSTS.has(url.hostname);
 }
-
-/* ---------------------------------------------------------- Clients ---- */
 
 export type RegisteredClient = {
   clientId: string;
@@ -208,7 +171,6 @@ export function readClient(secret: string, clientId: string): RegisteredClient |
   };
 }
 
-/** Stateless client secret: derived from the client id, never stored. */
 function clientSecretFor(secret: string, clientId: string): string {
   return mac(secret, `client-secret:${clientId}`);
 }
@@ -221,9 +183,6 @@ export function isValidClientSecret(
   return !!provided && safeEqual(provided, clientSecretFor(secret, clientId));
 }
 
-/* ------------------------------------------------------------ Codes ---- */
-
-/** Codes are single use. Remembered per server instance until they expire. */
 const usedCodes = new Map<string, number>();
 
 export function issueCode(
@@ -288,8 +247,6 @@ export function redeemCode(
   return { ok: true, payload };
 }
 
-/* ----------------------------------------------------------- Tokens ---- */
-
 export type TokenSet = {
   access_token: string;
   token_type: "Bearer";
@@ -326,11 +283,6 @@ export function readRefreshToken(secret: string, token: string): TokenPayload | 
   return verify<TokenPayload>(token, "refresh", secret);
 }
 
-/**
- * Checks the Authorization header on /api/mcp. Accepts an OAuth access token
- * issued for this exact endpoint, or MCP_ACCESS_TOKEN itself, which is how
- * MCP Inspector and scripts connect without the OAuth dance.
- */
 export function authenticateBearer(
   secret: string,
   authorization: string | null,

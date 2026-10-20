@@ -4,27 +4,12 @@ import dns from "node:dns";
 import https from "node:https";
 import net from "node:net";
 
-/**
- * Downloads an image from an address ChatGPT supplies, without letting that
- * address reach anything private (SSRF).
- *
- * - https only, on the standard port, with no user name or password
- * - every resolved IP address is checked when the connection is made, inside
- *   the DNS lookup, so a name cannot resolve to a public address during the
- *   check and a private one during the request
- * - at most three redirects, each checked the same way
- * - a timeout, a 10 MB ceiling enforced while streaming, and a content check
- *   on the actual bytes, so an SVG cannot slip through with an image/png label
- */
-
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const TIMEOUT_MS = 15_000;
 const MAX_REDIRECTS = 3;
 
 export class DownloadError extends Error {}
 
-// Two lists, because a single BlockList treats IPv4 addresses as IPv4-mapped
-// IPv6, so a ::ffff:0:0/96 rule would block every IPv4 address there is.
 const blockedV4 = new net.BlockList();
 const blockedV6 = new net.BlockList();
 for (const [address, prefix] of [
@@ -63,7 +48,6 @@ for (const [address, prefix] of [
   blockedV6.addSubnet(address, prefix, "ipv6");
 }
 
-/** `::ffff:7f00:1` or `::ffff:127.0.0.1` -> `127.0.0.1`. */
 function mappedIpv4(address: string): string | null {
   const match = address.toLowerCase().match(/^(?:0{0,4}:){0,5}:?ffff:(.+)$/);
   if (!match) return null;
@@ -89,7 +73,6 @@ export function isPrivateAddress(address: string): boolean {
   return true;
 }
 
-/** DNS lookup that refuses to hand back a private address. */
 const guardedLookup = ((
   hostname: string,
   options: dns.LookupOptions,
@@ -223,19 +206,11 @@ export async function downloadPublicFile(value: string): Promise<Downloaded> {
   throw new DownloadError("Bildeadressen videresender for mange ganger.");
 }
 
-/* ------------------------------------------------------------ Image check */
-
 export type ImageFormat = { mime: "image/jpeg" | "image/png" | "image/webp"; ext: string };
 
-/** Headers servers commonly send for a file whose type they do not know. */
 const GENERIC_TYPES = new Set(["", "application/octet-stream", "binary/octet-stream"]);
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/jpg", "image/pjpeg", "image/png", "image/webp"]);
 
-/**
- * Accepts JPG, PNG and WebP only, the formats the site can show. The decision
- * is made from the file's first bytes; the declared content type must agree
- * or be generic.
- */
 export function detectImageFormat(body: Buffer, contentType: string): ImageFormat {
   if (contentType.includes("svg")) {
     throw new DownloadError(

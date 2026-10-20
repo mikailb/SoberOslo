@@ -8,13 +8,6 @@ import {
 import { isAllowedRedirectUri, registerClient, type ClientAuthMethod } from "@/lib/mcp/oauth";
 import { rateLimit } from "@/lib/mcp/rateLimit";
 
-/**
- * Dynamic client registration (RFC 7591). ChatGPT registers itself once per
- * connection. Nothing is stored: the returned client id is a signed record of
- * the name and redirect addresses. Only ChatGPT's and local redirect addresses
- * are accepted, see isAllowedRedirectUri.
- */
-
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 

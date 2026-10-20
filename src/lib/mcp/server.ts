@@ -64,8 +64,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
   const helpers = createToolHelpers(actor);
   const { guarded, read } = helpers;
 
-  /* ------------------------------------------------- list_activities --- */
-
   server.registerTool(
     "list_activities",
     {
@@ -100,8 +98,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
       read(() => listActivities(client, { includePast, category, limit })),
   );
 
-  /* --------------------------------------------------- get_activity --- */
-
   server.registerTool(
     "get_activity",
     {
@@ -118,8 +114,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
     },
     async ({ activity }) => read(() => getActivity(client, activity)),
   );
-
-  /* ------------------------------------------------ create_activity --- */
 
   server.registerTool(
     "create_activity",
@@ -175,8 +169,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
         return { result: { created: true, ...result }, documentId: result.id, fields: Object.keys(input) };
       }),
   );
-
-  /* ------------------------------------------------ update_activity --- */
 
   server.registerTool(
     "update_activity",
@@ -235,8 +227,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
       }),
   );
 
-  /* ---------------------------------------- set_activity_visibility --- */
-
   server.registerTool(
     "set_activity_visibility",
     {
@@ -270,8 +260,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
         return { result, documentId: result.id, fields: ["isPublished"] };
       }),
   );
-
-  /* ------------------------------------------------ delete_activity --- */
 
   server.registerTool(
     "delete_activity",
@@ -312,8 +300,6 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
         return { result, documentId: result.id };
       }),
   );
-
-  /* ------------------------------------------ upload_activity_image --- */
 
   server.registerTool(
     "upload_activity_image",

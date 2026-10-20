@@ -17,11 +17,6 @@ import {
 } from "@/lib/mcp/oauth";
 import { rateLimit } from "@/lib/mcp/rateLimit";
 
-/**
- * Token endpoint: trades an authorization code (with PKCE) or a refresh token
- * for a new access token.
- */
-
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -29,7 +24,6 @@ function oauthError(error: string, description: string, status = 400): Response 
   return jsonResponse({ error, error_description: description }, status);
 }
 
-/** Client credentials may arrive in the body or as HTTP Basic. */
 function clientCredentials(request: Request, params: Record<string, string>) {
   const basic = request.headers.get("authorization")?.match(/^Basic\s+(\S+)$/i);
   if (basic) {

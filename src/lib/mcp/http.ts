@@ -1,13 +1,5 @@
 import "server-only";
 
-/**
- * Small response helpers shared by /api/mcp and the OAuth routes.
- *
- * CORS is open because these endpoints are authenticated with a header, never
- * a cookie, so another site gains nothing by calling them from a browser. It
- * lets MCP Inspector talk to the server directly.
- */
-
 export const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -51,7 +43,6 @@ export function withCors(response: Response): Response {
   });
 }
 
-/** The caller's address. Vercel sets x-forwarded-for itself, so it can be trusted there. */
 export function clientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return forwarded || request.headers.get("x-real-ip")?.trim() || "unknown";
@@ -68,7 +59,6 @@ export function tooManyRequests(retryAfterSeconds: number): Response {
   );
 }
 
-/** Reads a form or JSON body into plain key/value pairs. */
 export async function readParams(request: Request): Promise<Record<string, string>> {
   const type = request.headers.get("content-type") ?? "";
   const result: Record<string, string> = {};

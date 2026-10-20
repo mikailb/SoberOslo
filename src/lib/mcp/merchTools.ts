@@ -24,11 +24,6 @@ import {
 } from "./toolHelpers";
 import { altSchema, isHttpsUrl } from "./validation";
 
-/**
- * Tools for the merch page. The rules mirror the `merchPage` type in
- * src/sanity/schemaTypes/pages.ts.
- */
-
 const text = (label: string, max: number) =>
   z
     .string()
@@ -70,8 +65,6 @@ export function registerMerchTools(
   client: SanityClient,
   { guarded, read }: ToolHelpers,
 ) {
-  /* ------------------------------------------------- get_merch_page --- */
-
   server.registerTool(
     "get_merch_page",
     {
@@ -88,8 +81,6 @@ export function registerMerchTools(
     },
     async () => read(() => getMerchPage(client)),
   );
-
-  /* ---------------------------------------------- update_merch_page --- */
 
   server.registerTool(
     "update_merch_page",
@@ -139,8 +130,6 @@ export function registerMerchTools(
       }),
   );
 
-  /* ---------------------------------------------- add_merch_product --- */
-
   server.registerTool(
     "add_merch_product",
     {
@@ -186,8 +175,6 @@ export function registerMerchTools(
         };
       }),
   );
-
-  /* ------------------------------------------- update_merch_product --- */
 
   server.registerTool(
     "update_merch_product",
@@ -244,8 +231,6 @@ export function registerMerchTools(
       }),
   );
 
-  /* ------------------------------------------- remove_merch_product --- */
-
   server.registerTool(
     "remove_merch_product",
     {
@@ -285,8 +270,6 @@ export function registerMerchTools(
         return { result, documentId: "merchPage", fields: ["products"] };
       }),
   );
-
-  /* ------------------------------------- upload_merch_product_image --- */
 
   server.registerTool(
     "upload_merch_product_image",

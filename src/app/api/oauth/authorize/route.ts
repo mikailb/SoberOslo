@@ -9,15 +9,6 @@ import {
 } from "@/lib/mcp/oauth";
 import { rateLimit } from "@/lib/mcp/rateLimit";
 
-/**
- * The login page ChatGPT opens when the connection is added.
- *
- * A board member types the shared password (MCP_ACCESS_TOKEN). If it matches,
- * the browser is sent back to ChatGPT with a single-use code. The page has no
- * scripts, and its own Content Security Policy, set here, only lets the form
- * send the browser on to the redirect address that was validated.
- */
-
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 

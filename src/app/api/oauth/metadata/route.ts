@@ -1,11 +1,6 @@
 import { mcpEndpoints, OAUTH_SCOPE, publicOrigin } from "@/lib/mcp/config";
 import { jsonResponse, preflightResponse } from "@/lib/mcp/http";
 
-/**
- * OAuth authorization server metadata (RFC 8414). Served at
- * /.well-known/oauth-authorization-server through a rewrite in next.config.ts.
- */
-
 export const dynamic = "force-dynamic";
 
 export function GET(request: Request): Response {
