@@ -721,3 +721,62 @@ export const merchPage = defineType({
   ],
   preview: { prepare: () => ({ title: "Merch" }) },
 });
+
+/**
+ * The scratch card on /overrask-meg. Each idea is one possible result under
+ * the cover; the website picks one of them at random.
+ */
+export const surprisePage = defineType({
+  name: "surprisePage",
+  title: "Overrask meg",
+  type: "document",
+  fields: [
+    defineField({
+      name: "heading",
+      title: "Overskrift",
+      type: "string",
+      description: 'Standard er "Hva skal vi finne på?".',
+      validation: (rule) => rule.max(70),
+    }),
+    defineField({
+      name: "intro",
+      title: "Undertekst",
+      type: "string",
+      description: 'Standard er "Skrap fram kveldens plan.".',
+      validation: (rule) => rule.max(160),
+    }),
+    defineField({
+      name: "ideas",
+      title: "Ideer på skrapekortet",
+      type: "array",
+      description:
+        "Én av disse trekkes tilfeldig hver gang noen skraper. Er listen tom, brukes de innebygde ideene, så kortet aldri blir tomt.",
+      validation: (rule) => rule.max(100),
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "idea",
+          title: "Idé",
+          fields: [
+            defineField({
+              name: "title",
+              title: "Idé",
+              type: "string",
+              description: 'Kort og konkret, for eksempel "Bowling + pizza".',
+              validation: (rule) => rule.required().max(40),
+            }),
+            defineField({
+              name: "note",
+              title: "Morsom tekst under",
+              type: "string",
+              description: "Valgfritt. Én kort, lun setning.",
+              validation: (rule) => rule.max(120),
+            }),
+          ],
+          preview: { select: { title: "title", subtitle: "note" } },
+        }),
+      ],
+    }),
+  ],
+  preview: { prepare: () => ({ title: "Overrask meg" }) },
+});

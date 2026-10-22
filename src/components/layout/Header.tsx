@@ -33,7 +33,7 @@ export function Header({ membershipUrl, organisationName }: HeaderProps) {
               />
             </Link>
 
-            <nav aria-label="Hovedmeny" className="hidden md:block">
+            <nav aria-label="Hovedmeny" className="hidden lg:block">
               <ul className="flex items-center gap-1">
                 {navigation.map((item) => (
                   <li key={item.href}>
@@ -58,7 +58,7 @@ export function Header({ membershipUrl, organisationName }: HeaderProps) {
                 href={membershipUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden rounded-full bg-ink px-6 py-3 text-[0.9375rem] font-semibold text-cream transition-colors duration-200 hover:bg-green md:inline-flex"
+                className="hidden rounded-full bg-ink px-6 py-3 text-[0.9375rem] font-semibold text-cream transition-colors duration-200 hover:bg-green lg:inline-flex"
               >
                 Bli medlem
               </a>

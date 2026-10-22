@@ -3,7 +3,7 @@ import type { StructureResolver } from "sanity/structure";
 /**
  * The left-hand menu in the editor.
  *
- * Activities and merch are lists. The four page documents exist once each, so
+ * Activities and merch are lists. The page documents exist once each, so
  * they open straight into the form instead of showing an empty list with a
  * "create" button.
  */
@@ -13,6 +13,7 @@ const SINGLETONS = [
   { id: "aboutPage", title: "Om oss" },
   { id: "soberKvinnerPage", title: "Sober Kvinner" },
   { id: "merchPage", title: "Merch" },
+  { id: "surprisePage", title: "Overrask meg" },
   { id: "siteSettings", title: "Innstillinger" },
 ] as const;
 

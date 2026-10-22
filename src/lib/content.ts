@@ -12,6 +12,7 @@ import {
   pastActivitiesQuery,
   siteSettingsQuery,
   soberKvinnerPageQuery,
+  surprisePageQuery,
   upcomingActivitiesByCategoryQuery,
   upcomingActivitiesQuery,
 } from "@/sanity/queries";
@@ -26,6 +27,7 @@ import type {
   MerchPage,
   SiteSettings,
   SoberKvinnerPage,
+  SurprisePage,
 } from "@/sanity/types";
 import { safeExternalUrl } from "./urls";
 import { findStarterActivity, siteConfig, starterActivities } from "./site";
@@ -234,4 +236,8 @@ export async function getSoberKvinnerPage(): Promise<SoberKvinnerPage | null> {
 
 export async function getMerchPage(): Promise<MerchPage | null> {
   return sanityFetch<MerchPage>(merchPageQuery);
+}
+
+export async function getSurprisePage(): Promise<SurprisePage | null> {
+  return sanityFetch<SurprisePage>(surprisePageQuery);
 }

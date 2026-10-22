@@ -444,6 +444,17 @@ Merch-siden:
 | `remove_merch_product`       | Fjerner for godt, krever `confirm` og produktnavnet  |
 | `upload_merch_product_image` | Produktbilde, fra chatten eller en URL               |
 
+| Verktøy                | Hva det gjør                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| `get_surprise_ideas`   | Tekstene og alle ideene på skrapekortet («Overrask meg»)      |
+| `add_surprise_ideas`   | Én eller flere nye ideer. Dubletter hoppes over               |
+| `update_surprise_idea` | Endrer ideen eller den morsomme teksten under                 |
+| `remove_surprise_idea` | Fjerner for godt, krever `confirm` og ideen                   |
+| `update_surprise_page` | Overskrift og undertekst over skrapekortet                    |
+
+Be ChatGPT om for eksempel «finn på fem nye ideer til skrapekortet». Den
+henter listen først, foreslår ideer i samme stil og lagrer bare de du godkjenner.
+
 Endringer vises på nettsiden med en gang, fordi sidene som berøres oppdateres
 etter hver skriving. Har en aktivitet eller merch-siden et upublisert utkast
 åpent i Studio, skrives endringen også dit, så neste Publish i Studio ikke

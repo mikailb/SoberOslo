@@ -18,6 +18,7 @@ import {
 } from "./activities";
 import type { Actor } from "./audit";
 import { registerMerchTools } from "./merchTools";
+import { registerSurpriseTools } from "./surpriseTools";
 import {
   chatFileSchema,
   createToolHelpers,
@@ -50,7 +51,7 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
     { name: "sober-oslo", title: "Sober Oslo – nettsiden", version: "1.1.0" },
     {
       instructions: [
-        `Du hjelper styret i Sober Oslo med å administrere aktivitetene og merch-siden på nettsiden ${siteConfig.url}.`,
+        `Du hjelper styret i Sober Oslo med å administrere aktivitetene, merch-siden og ideene på skrapekortet («Overrask meg») på nettsiden ${siteConfig.url}.`,
         `I dag er det ${today} (tidssone Europe/Oslo). Bruk denne datoen for å tolke «fredag», «i morgen», «neste uke» og lignende. Mener brukeren en ukedag uten mer, velg den nærmeste kommende.`,
         "Svar på norsk.",
         "Før du oppretter, endrer, skjuler, sletter eller laster opp bilder: oppsummer nøyaktig hva som blir gjort (alle felt med verdier) og be om eksplisitt bekreftelse. Ikke kall skriveverktøyet før brukeren har sagt ja.",
@@ -348,6 +349,7 @@ export function createMcpServer(client: SanityClient, actor: Actor): McpServer {
   );
 
   registerMerchTools(server, client, helpers);
+  registerSurpriseTools(server, client, helpers);
 
   return server;
 }

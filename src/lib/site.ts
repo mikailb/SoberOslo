@@ -66,6 +66,7 @@ const ALL_NAVIGATION = [
   { href: "/sober-kvinner", label: "Sober Kvinner" },
   { href: "/about", label: "Om oss" },
   { href: "/merch", label: "Merch" },
+  { href: "/overrask-meg", label: "Overrask meg" },
 ] as const;
 
 export const navigation = ALL_NAVIGATION.filter(
@@ -238,6 +239,45 @@ export const merchContent = {
   ctaHeading: "Støtt arbeidet",
   ctaBody:
     "Medlemskapet ditt betaler for lokaler, utstyr og turer. Det er det som gjør at aktivitetene kan være gratis eller nesten gratis.",
+} as const;
+
+/**
+ * The scratch card on /overrask-meg. Heading, intro and ideas can be changed
+ * in Sanity under Overrask meg; the button and cover words stay in code.
+ */
+export const surpriseContent = {
+  heading: "Hva skal vi finne på?",
+  intro: "Skrap fram kveldens plan.",
+  coverLabel: "SKRAP HER",
+  coverHint: "med musa eller fingeren",
+  resultEyebrow: "Kveldens plan",
+  againLabel: "Gi meg en ny",
+  ideas: [
+    {
+      title: "Bowling + pizza",
+      note: "Ingen dømmer stilen din. Bare antall strikes.",
+    },
+    {
+      title: "Keramikk + kaffe",
+      note: "Koppen blir kanskje skjev, men kaffen smaker like godt.",
+    },
+    {
+      title: "Spillkveld",
+      note: "Vennskap tåler mye. Monopol tester grensene.",
+    },
+    {
+      title: "Tur + noe varmt å drikke",
+      note: "Kakao på termos er sterkt undervurdert luksus.",
+    },
+    {
+      title: "Kino + nattmat",
+      note: "Diskusjonen etterpå er minst halve filmen.",
+    },
+    {
+      title: "Badstue + fjordbad",
+      note: "Varmt, kaldt, varmt igjen. Du går hjem som et nytt menneske.",
+    },
+  ],
 } as const;
 
 const practicalBasics = [

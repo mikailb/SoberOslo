@@ -112,6 +112,19 @@ export type MerchPage = {
   ctaBody?: string | null;
 };
 
+/** One possible result on the scratch card at /overrask-meg. */
+export type SurpriseIdea = {
+  _key: string;
+  title: string;
+  note?: string | null;
+};
+
+export type SurprisePage = {
+  heading?: string | null;
+  intro?: string | null;
+  ideas?: SurpriseIdea[] | null;
+};
+
 export type HomeStat = {
   _key: string;
   value: string;

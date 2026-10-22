@@ -88,6 +88,11 @@ const expected = [
   "update_merch_product",
   "remove_merch_product",
   "upload_merch_product_image",
+  "get_surprise_ideas",
+  "add_surprise_ideas",
+  "update_surprise_idea",
+  "remove_surprise_idea",
+  "update_surprise_page",
 ];
 check(
   expected.every((name) => tools.some((tool) => tool.name === name)),
@@ -99,7 +104,8 @@ const readOnly = tools
   .map((tool) => tool.name)
   .sort();
 check(
-  readOnly.join() === ["get_activity", "get_merch_page", "list_activities"].join(),
+  readOnly.join() ===
+    ["get_activity", "get_merch_page", "get_surprise_ideas", "list_activities"].join(),
   "Bare lese-verktøyene er merket read-only",
   readOnly.join(", "),
 );
@@ -120,6 +126,12 @@ check(!merch.isError, "get_merch_page", merch.isError ? merch.text : `${merch.da
 
 const badShop = await callTool("update_merch_page", { shopUrl: "http://butikk.no" });
 check(badShop.isError && /https:\/\//.test(badShop.text), "Butikklenke uten https gir norsk feilmelding");
+
+const surprise = await callTool("get_surprise_ideas", {});
+check(!surprise.isError, "get_surprise_ideas", surprise.isError ? surprise.text : `${surprise.data?.ideas?.length ?? 0} ideer`);
+
+const longIdea = await callTool("add_surprise_ideas", { ideas: [{ title: "x".repeat(41) }] });
+check(longIdea.isError && /maks 40 tegn/.test(longIdea.text), "For lang idé gir norsk feilmelding");
 
 if (write) {
   const title = `MCP-test ${new Date().toISOString().slice(0, 19)}`;
@@ -185,6 +197,29 @@ if (write) {
       confirmName: productName,
     });
     check(!removed.isError, "remove_merch_product", removed.isError ? removed.text : "");
+  }
+
+  const ideaTitle = `MCP-test ${Date.now()}`.slice(0, 40);
+  const ideas = await callTool("add_surprise_ideas", {
+    ideas: [{ title: ideaTitle, note: "Automatisk test." }, { title: ideaTitle }],
+  });
+  check(
+    !ideas.isError && ideas.data?.added?.length === 1 && ideas.data?.skippedAsDuplicates?.length === 1,
+    "add_surprise_ideas (hopper over dublett)",
+    ideas.isError ? ideas.text : "",
+  );
+  const ideaKey = ideas.data?.added?.[0]?.key;
+
+  if (ideaKey) {
+    const changed = await callTool("update_surprise_idea", { idea: ideaKey, note: "Endret." });
+    check(!changed.isError, "update_surprise_idea", changed.isError ? changed.text : "");
+
+    const removed = await callTool("remove_surprise_idea", {
+      idea: ideaKey,
+      confirm: true,
+      confirmTitle: ideaTitle,
+    });
+    check(!removed.isError, "remove_surprise_idea", removed.isError ? removed.text : "");
   }
 }
 

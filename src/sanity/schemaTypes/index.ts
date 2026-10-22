@@ -8,12 +8,14 @@ import {
   homePage,
   merchPage,
   soberKvinnerPage,
+  surprisePage,
 } from "./pages";
 import { siteSettings } from "./siteSettings";
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   activity,
   merchPage,
+  surprisePage,
   homePage,
   activitiesPage,
   aboutPage,

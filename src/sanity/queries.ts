@@ -167,3 +167,11 @@ export const merchPageQuery = groq`
     ctaBody
   }
 `;
+
+export const surprisePageQuery = groq`
+  *[_type == "surprisePage"][0] {
+    heading,
+    intro,
+    "ideas": ideas[defined(title)]{ _key, title, note }
+  }
+`;

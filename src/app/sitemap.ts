@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(SHOW_SOBER_KVINNER ? ["/sober-kvinner"] : []),
     "/about",
     "/merch",
+    "/overrask-meg",
   ].map((path) => ({
     url: `${siteConfig.url}${path}`,
     lastModified: now,
