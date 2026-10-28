@@ -112,7 +112,7 @@ export type MerchPage = {
   ctaBody?: string | null;
 };
 
-/** One possible result on the scratch card at /overrask-meg. */
+/** One possible plan that Oslo Run unlocks on /oslo-run. */
 export type SurpriseIdea = {
   _key: string;
   title: string;

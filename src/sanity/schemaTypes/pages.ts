@@ -723,8 +723,8 @@ export const merchPage = defineType({
 });
 
 /**
- * The scratch card on /overrask-meg. Each idea is one possible result under
- * the cover; the website picks one of them at random.
+ * The surprise on /oslo-run. Each idea is one possible plan that Oslo Run
+ * unlocks; the website picks one of them at random.
  */
 export const surprisePage = defineType({
   name: "surprisePage",
@@ -742,15 +742,16 @@ export const surprisePage = defineType({
       name: "intro",
       title: "Undertekst",
       type: "string",
-      description: 'Standard er "Skrap fram kveldens plan.".',
+      description:
+        'Standard er "Ta en runde Oslo Run. Klarer du målet, låser du opp en overraskelse.".',
       validation: (rule) => rule.max(160),
     }),
     defineField({
       name: "ideas",
-      title: "Ideer på skrapekortet",
+      title: "Ideer til overraskelsen",
       type: "array",
       description:
-        "Én av disse trekkes tilfeldig hver gang noen skraper. Er listen tom, brukes de innebygde ideene, så kortet aldri blir tomt.",
+        "Én av disse trekkes tilfeldig når noen fullfører Oslo Run. Er listen tom, brukes de innebygde ideene, så det alltid finnes noe å låse opp.",
       validation: (rule) => rule.max(100),
       of: [
         defineArrayMember({

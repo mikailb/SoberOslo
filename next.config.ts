@@ -80,6 +80,11 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // The game page used to be called "Overrask meg".
+  async redirects() {
+    return [{ source: "/overrask-meg", destination: "/oslo-run", permanent: true }];
+  },
+
   async headers() {
     return [
       {

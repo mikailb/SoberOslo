@@ -23,13 +23,13 @@ type RawSurprisePage = { _id: string; _rev: string; ideas?: RawIdea[] | null } &
   Record<SurpriseTextField, string | null>
 >;
 
-const pageUrl = `${siteConfig.url.replace(/\/$/, "")}/overrask-meg`;
+const pageUrl = `${siteConfig.url.replace(/\/$/, "")}/oslo-run`;
 
 function revalidateSurprisePage() {
   try {
-    revalidatePath("/overrask-meg");
+    revalidatePath("/oslo-run");
   } catch (error) {
-    console.error("[mcp] Kunne ikke oppdatere /overrask-meg:", error);
+    console.error("[mcp] Kunne ikke oppdatere /oslo-run:", error);
   }
 }
 

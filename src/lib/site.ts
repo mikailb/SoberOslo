@@ -66,7 +66,7 @@ const ALL_NAVIGATION = [
   { href: "/sober-kvinner", label: "Sober Kvinner" },
   { href: "/about", label: "Om oss" },
   { href: "/merch", label: "Merch" },
-  { href: "/overrask-meg", label: "Overrask meg" },
+  { href: "/oslo-run", label: "Oslo Run" },
 ] as const;
 
 export const navigation = ALL_NAVIGATION.filter(
@@ -242,16 +242,18 @@ export const merchContent = {
 } as const;
 
 /**
- * The scratch card on /overrask-meg. Heading, intro and ideas can be changed
- * in Sanity under Overrask meg; the button and cover words stay in code.
+ * /oslo-run: Oslo Run and the plan it unlocks. Heading, intro and ideas
+ * can be changed in Sanity under Overrask meg; the rest stays in code.
  */
 export const surpriseContent = {
   heading: "Hva skal vi finne på?",
-  intro: "Skrap fram kveldens plan.",
-  coverLabel: "SKRAP HER",
-  coverHint: "med musa eller fingeren",
-  resultEyebrow: "Kveldens plan",
-  againLabel: "Gi meg en ny",
+  intro:
+    "Ta en runde Oslo Run. Klarer du målet, låser du opp en overraskelse.",
+  heroHeading: "Hvor langt kommer du?",
+  heroIntro: "Løp langs fjorden, samle logoer og hopp over alt som står i veien.",
+  ctaHeading: "Likte du runden?",
+  ctaBody:
+    "Som medlem får du tilgang til flere aktiviteter, nye mennesker og et fellesskap som er glad for at du er med.",
   ideas: [
     {
       title: "Bowling + pizza",
