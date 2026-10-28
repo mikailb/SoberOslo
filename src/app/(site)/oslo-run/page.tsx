@@ -19,10 +19,11 @@ export default async function OsloRunPage() {
   return (
     <>
       {/* -------------------------------------------------------- Hero */}
-      <section className="relative isolate aspect-[2/1] overflow-hidden sm:aspect-[5/1]">
+      <section className="relative isolate overflow-hidden pb-[42%] sm:aspect-[5/1] sm:pb-0">
         {/* The whole panorama, uncropped and across the full width, with the
             sky from the game above it. On a phone it is cropped a little
-            instead, so it does not turn into a thin strip. */}
+            instead, so it does not turn into a thin strip, and the text sits
+            on the sky above it rather than on the city. */}
         <Image
           src="/images/oslo-run/bg-sky.png"
           alt=""
@@ -30,7 +31,7 @@ export default async function OsloRunPage() {
           sizes="100vw"
           className="-z-20 object-cover object-[0%_50%]"
         />
-        <div className="absolute inset-0 sm:inset-x-0 sm:top-auto sm:bottom-0 sm:[aspect-ratio:2017/265] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,#000_22%)]">
+        <div className="absolute inset-x-0 bottom-0 aspect-[20/9] sm:[aspect-ratio:2017/265] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,#000_22%)]">
           <Image
             src="/images/oslo-run/hero-oslo.webp"
             alt="Oslo sett fra fjorden, med Akershus, Rådhuset og Operaen"
@@ -52,12 +53,12 @@ export default async function OsloRunPage() {
         />
 
         {/* A short line on the sky, above the city. */}
-        <div className="relative mx-auto max-w-xl px-5 pt-3 text-center sm:pt-[3%]">
+        <div className="relative mx-auto max-w-xl px-5 pt-6 text-center sm:pt-[3%]">
           <p className="eyebrow text-[0.65rem] text-green sm:text-xs">Oslo Run</p>
           <h1 className="mt-1 font-display text-2xl leading-tight font-medium tracking-[-0.02em] text-ink sm:mt-1.5 sm:text-4xl">
             {surpriseContent.heroHeading}
           </h1>
-          <p className="mt-1 hidden text-sm text-ink/80 sm:block sm:text-base">
+          <p className="mt-1 text-sm text-ink/80 sm:text-base">
             {surpriseContent.heroIntro}
           </p>
         </div>

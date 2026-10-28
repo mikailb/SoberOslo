@@ -5,7 +5,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type PointerEvent,
   type ReactNode,
 } from "react";
@@ -39,7 +38,7 @@ function gameOverLine(meters: number) {
 const STEP = 1 / 120;
 /** The game window is this many world units tall on a desktop screen ... */
 const BASE_HEIGHT = 326;
-/** ... and is never scaled up further than this, e.g. in fullscreen ... */
+/** ... and is never scaled up further than this ... */
 const MAX_SCALE = 1.6;
 /** ... nor narrower than this, so a phone still shows enough road ahead. */
 const MIN_WIDTH = 500;
@@ -48,12 +47,6 @@ const LOGO_ICON = "/images/oslo-run/SoberOslo%20Logo.png";
 const JUMP_KEYS = new Set(["Space", "ArrowUp", "KeyW"]);
 const DUCK_KEYS = new Set(["ArrowDown", "KeyS"]);
 const PAUSE_KEYS = new Set(["KeyP", "Escape"]);
-
-const noSubscribe = () => () => {};
-const onFullscreenChange = (callback: () => void) => {
-  document.addEventListener("fullscreenchange", callback);
-  return () => document.removeEventListener("fullscreenchange", callback);
-};
 
 type Controls = {
   start: () => void;
@@ -79,17 +72,6 @@ export function OsloRun() {
   const controls = useRef<Controls | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
   const [result, setResult] = useState<Result | null>(null);
-
-  const canFullscreen = useSyncExternalStore(
-    noSubscribe,
-    () => document.fullscreenEnabled,
-    () => false,
-  );
-  const isFullscreen = useSyncExternalStore(
-    onFullscreenChange,
-    () => document.fullscreenElement !== null && document.fullscreenElement === cardRef.current,
-    () => false,
-  );
 
   useEffect(() => {
     const card = cardRef.current;
@@ -343,30 +325,19 @@ export function OsloRun() {
     controls.current?.duck(false);
   }
 
-  function toggleFullscreen() {
-    const card = cardRef.current;
-    if (!card) return;
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    else card.requestFullscreen().catch(() => {});
-  }
-
   return (
     <div
       ref={cardRef}
-      className={`flex flex-col bg-paper ${
-        isFullscreen
-          ? "h-full w-full p-3 sm:p-4"
-          : "rounded-[24px] p-2.5 shadow-[0_18px_40px_-22px_rgba(35,31,32,0.35),0_1px_3px_rgba(35,31,32,0.06)] sm:p-[15px]"
-      }`}
+      className="flex flex-col rounded-[24px] bg-paper p-2.5 shadow-[0_18px_40px_-22px_rgba(35,31,32,0.35),0_1px_3px_rgba(35,31,32,0.06)] sm:p-[15px]"
     >
       {/* --------------------------------------------- Game window + HUD */}
       <div
         ref={playRef}
         tabIndex={-1}
         onPointerDown={handlePointerDown}
-        className={`relative overflow-hidden rounded-[14px] bg-[#8fc8ee] outline-none select-none sm:rounded-[16px] ${
-          isFullscreen ? "min-h-0 flex-1" : "aspect-[4/3] sm:aspect-auto sm:h-[clamp(280px,23vw,330px)]"
-        } ${phase === "running" ? "touch-none" : "touch-manipulation"}`}
+        className={`relative aspect-[4/3] overflow-hidden rounded-[14px] bg-[#8fc8ee] outline-none select-none sm:aspect-auto sm:h-[clamp(280px,23vw,330px)] sm:rounded-[16px] ${
+          phase === "running" ? "touch-none" : "touch-manipulation"
+        }`}
       >
         <canvas
           ref={canvasRef}
@@ -546,28 +517,6 @@ export function OsloRun() {
           </span>
           <span className="hidden pointer-coarse:inline">Tapp for å hoppe · hold «Dukk» for å dukke</span>
         </p>
-        {canFullscreen ? (
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            aria-label={isFullscreen ? "Avslutt fullskjerm" : "Spill i fullskjerm"}
-            className="-mr-1 flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/[0.06]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d={
-                  isFullscreen
-                    ? "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"
-                    : "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"
-                }
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        ) : null}
       </div>
     </div>
   );
